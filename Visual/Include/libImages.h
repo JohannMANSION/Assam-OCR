@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "libOutils.h"
 
@@ -72,5 +73,88 @@
 
 	IMAGERGB bruitAleatoireImage(IMAGERGB img, int amplitude);
 	double distanceHistogrammeImage(TABLEAU_INT h1, TABLEAU_INT h2);
+
+	typedef char NOM[100]; // nom des chemin+images borne a 100 caracteres
+	void listeImages(void);
+
+	// ***************************************** //
+	// Fonctions codées pour le projet C IPSI1 : //
+	// ***************************************** //
+
+	// Fonctions de morpho OK -----------------------------------------------------------------------------
+	IMAGE imDilateV4(IMAGE img); // Dilatation morphologique V4 d'une image
+	IMAGE imgReplicate(IMAGE img); // Renvoie l'image avec les pixels de bord dupliqués
+	IMAGE imgTroncature(IMAGE img); // Renvoie l'image avec les pixels de bord enlevés
+	IMAGE strelV4(void); //renvoie un élément structurant V4 (ndg = 0 quand pas dans voisinage et ndg = 255 quand dans voisinage)
+	IMAGE imDilate(IMAGE img, IMAGE strel); // Dilatation morphologique d'une image (fonctionne pour tout élément structurant)
+	IMAGE imErode(IMAGE img, IMAGE strel); // Erosion morphologique d'une image (fonctionne pour tout élément structurant)
+	IMAGE imClose(IMAGE img, IMAGE strel); // Fermeture (Dilatation puis Erosion morphologique) d'une image
+	IMAGE imBiggerWith0(IMAGE img); // Agrandi l'image de +1 pixel sur les bords avec des 0
+	IMAGE imCloseMATLAB(IMAGE img, IMAGE strel); // Renvoie la même fermeture que matlab càd réalise la dilatation sur image + grande 
+	IMAGE allocationImage0(int Nblig, int Nbcol); // Initialisation d'une image avec des 0
+	IMAGE imSkelApprox(IMAGE img); // Copie de la précédente quand étape 1 fonctionne pour ajout étape 2
+	int nbTransitions01forSkel(int nbVoisins1[]); // Renvoie le nombre de transition de 0 vers 1 dans le voisinage V8 par parcours horaire
+	IMAGE imSpur1(IMAGE img); // Enlève un pixel à chaque extrémité (opti possible)
+	IMAGE imSpurInf(IMAGE img); // Enleve toutes les extrémités (opti possible car appel en boucle de imSpur1 donc allocations multiples)
+	IMAGE imCopy(IMAGE img); // Copie l'image
+
+	// Fonctions de morpho banquales --------------------------------------------------------------------------
+	IMAGE imErodeWith0(IMAGE img, IMAGE strel); // On veux le même comportement que MATLAB FONCTION A CHECKER
+	IMAGE imFill(IMAGE img); // Remplis l'intérieur des objets fermés sur l'image (A SURVEILLER NE MARCHE QUE POUR 1 TROUS SUR L'IMAGE)
+	
+	// Fonctions de détection cercle --------------------------------------------------------------------------
+		// Fonction DEBUG
+	void detectionCercleFIX(IMAGE img, char *nomImage); // Sauvegarde chaque image boucle obtenue avec chaque élément structurant (FONCTION DE DEBUG)
+	void detectionCercleV2(IMAGE img, char *nomImage); // Sauvegarde uniquement la meilleure image boucle détectée (FONCTION DE DEBUG)
+	void detectionCercleForAll(); // Déroule detectionCercleV2saveSkel pour tous les caractères (pour vérifier sont bon fonctionnement) // DEROULE POUR LE MOMENT QUE LES NEUFS PREMIERS)
+	void numDiskToString(int num, char *chaineTaille11); // Renvoie le nom de l'image à ouvrir associée au numéro du disque (ex : num=1 renvoie "disk1.pgm")
+	void detectionCercleV2saveSkel(IMAGE img, char* nomImage); // Sauvegarde la meilleure image boucle et le skelette et spur(FONCTION DE DEBUG)
+		// Fonction finale utilisable
+	void detectionCercle(IMAGE img, IMAGE *OUT, IMAGE *SKEL, IMAGE *SPUR); // Fonction utilisable pour le projet modifie directement les images OUT, SKEL, SPUR entrées
+
+	// Fonctions de signature ------------------------------------------------------------------------------------------
+		// Fonctions OK
+	int nbPix255haut(IMAGE img); // Renvoie le nombre de pixels à 255 en haut de l'image
+	int nbPix255bas(IMAGE img); // Renvoie le nombre de pixels à 255 en bas de l'image
+	double imCompacity(IMAGE OUT, IMAGE SPUR); // Renvoie la compacité à partir de l'image OUT (boucle) et l'image SPUR par calcul simple (perimetre = nbPixSpur)
+	void imCentreGrav(IMAGE img, double *centreXgrav, double *centreYgrav); // Modifie les valeur des centre grav en fonction de l'image d'entree 
+	double distSTDcentreGrav(IMAGE img);				// Renvoie l'écart type des distances entre chaque pixel blanc de l'image et le centre de gravité
+	int nbPixQuartBasGauche255(IMAGE img);	// Renvoie le nombre de pixels à 255 dans la région quart bas gauche de l'image
+	int nbPixDiagSup255(IMAGE img);		// Renvoie le nombre de pixels blancs au dessus de la diagonale de l'image (ne compte pas ceux de la diagonale)
+	int nbPixDiagInf255(IMAGE img);		// Renvoie le nombre de pixels blancs au dessous de la diagonale de l'image (ne compte pas ceux de la diagonale)
+
+		// Fonctions OK mais seulement des intermédiaires
+	TABLEAU_DOUBLE imDistPixCentreGrav(IMAGE img);		// Renvoie le tableau des distances entre chaque pixel blanc de l'image et le centre de gravité
+	double moyenneTableauDouble(TABLEAU_DOUBLE tab);	// Renvoie la moyenne d'un tableau de double
+	double ecartTypeTableauDouble(TABLEAU_DOUBLE tab);	// Renvoie l'écart type d'un tableau de double
+
+		// Fonctions NON OK
+	TABLEAU_INT imChainCode(IMAGE img); // Renvoie la chain code de l'objet (faite pour reçevoir des image skelette)
+	double imPerimeter(IMAGE img); // Renvoie le perimetre à partir de la chain Code (fait pour recevoir des images skelettes) 
+								   // le perimetre n'est pas bon, provient surrement de l'image skel, on calculera la compacité avec nbPix image SPUR pour le moment
+
+	// Fonction calcul des signatures et enregistrement csv ------------------------------------------------------------------------------------------
+	void signatureToCSV(char *repertoire); // EN DEV
+
+	// Définitions de structures
+	typedef struct signaturesOCR {
+		int nbPixBoucleHaut;
+		int nbPixBoucleBas;
+		double compacity;
+		double distSTDskel;
+		int nbPixSkelQuartBasGauche;
+		double skelXcentreGrav;
+		double skelYcentreGrav;
+		double boucleXcentreGrav;
+		double boucleYcentreGrav;
+		double diffSkelBoucleXcentreGrav;
+		double diffSkelBoucleYcentreGrav;
+		int nbPixDiagInfSkel;
+		int nbPixDiagSupSkel;
+	} SIGNATURES_OCR;
+
+	// FONCTIONS EN DEVELOPPEMENT
+	IMAGE imConvexHull(IMAGE img);		// Renvoie l'enveloppe convexe de l'image
+	
 #endif LIB_IMAGES_H
 

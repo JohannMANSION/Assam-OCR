@@ -7,40 +7,57 @@
 #include "libImages.h"
 #include "libOutils.h"
 
-
-typedef char NOM[100]; // nom des chemin+images born� � 100 caract�res
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 
 void main(void)
 {
-	FILE *F = NULL;
-	NOM *liste = NULL; // liste des images
-	NOM ligne;
-	int nb = 0;
+	
+	//IMAGE test = lectureImage("..\\..\\Images\\test\\388.pgm");
 
-	char *nom = NULL;
+	//listeImages();
 
-	// mise en m�moire images pgm/ppm 
+	IMAGE img = { 0,0,NULL,NULL };
+	IMAGE imgSeuillee = { 0,0,NULL,NULL };
+	IMAGE imgSeuilleeInversee = { 0,0,NULL,NULL };
+	IMAGE imgSeuilInvDil0 = { 0,0,NULL,NULL };
 
-	system("dir /S /B *.p*m > listeDesImages.txt");
+	char nomImage[8] = "006.pgm";
+	img = lectureImage(nomImage);
+	//sauvegardeImage(img, "P5", "..\\..\\Res\\img.pgm");
 
-	F = fopen("listeDesImages.txt", "r");
-	while (fscanf(F, "%s", ligne) > 0)
-	{
-		if (!liste)
-		{
-			liste = (NOM*)malloc(sizeof(NOM));
-			strcpy(liste[nb], ligne);
-			nb++;
-		}
-		else
-		{
-			liste = (NOM*)realloc(liste, sizeof(NOM)*(++nb));
-			strcpy(liste[nb - 1], ligne);
-		}
-	}
-	fclose(F);
+	imgSeuillee = seuillageOtsu(img);
+	//sauvegardeImage(imgSeuillee, "P5", "..\\..\\Res\\imgSeuillee.pgm");
 
-	printf("Derniere entree : %s\n", liste[nb - 1]);
+	imgSeuilleeInversee = inverseImage(imgSeuillee);
+	sauvegardeImage(imgSeuilleeInversee, "P5", "..\\..\\Res\\imgSeuilleeInversee.pgm");
+
+	/*
+	TABLEAU_DOUBLE tab = imDistPixCentreGrav(imgSeuilleeInversee);
+	double moyenne = moyenneTableauDouble(tab);
+	double ecartType = ecartTypeTableauDouble(tab);
+	
+	for (int i = 0; i < tab.size; i++)
+		printf("%lf\t", tab.data[i]);
+	printf("MOY : %lf, STD : %lf \n", moyenne, ecartType);
+	liberationTableauDouble(&tab);
+	*/
+
+	IMAGE testCONVEX = imConvexHull(imgSeuilleeInversee);
+	sauvegardeImage(testCONVEX, "P5", "..\\..\\Res\\testCONVEX.pgm");
+	liberationImage(&testCONVEX);
+
+	liberationImage(&img);
+	liberationImage(&imgSeuillee);
+	liberationImage(&imgSeuilleeInversee);
+	liberationImage(&imgSeuilInvDil0);
+
+	//signatureToCSV("train");
+	
+
+
+	_CrtDumpMemoryLeaks();
 
 	system("pause");
 }

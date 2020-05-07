@@ -840,3 +840,1998 @@ IMAGERGB bruitAleatoireImage(IMAGERGB img, int amplitude)
 
 	return out;
 }
+
+void listeImages(void)
+{
+	FILE *F = NULL;
+	NOM *liste = NULL; // liste des images
+	NOM ligne;
+	int nb = 0;
+
+	char *nom = NULL;
+
+	// mise en memoire images pgm/ppm 
+
+	system("dir /S /B *.p*m > listeDesImages.txt");
+
+	F = fopen("listeDesImages.txt", "r");
+	while (fscanf(F, "%s", ligne) > 0)
+	{
+		if (!liste)
+		{
+			liste = (NOM*)malloc(sizeof(NOM));
+			strcpy(liste[nb], ligne);
+			nb++;
+		}
+		else
+		{
+			liste = (NOM*)realloc(liste, sizeof(NOM)*(++nb));
+			strcpy(liste[nb - 1], ligne);
+		}
+	}
+	fclose(F);
+
+	printf("Derniere entree : %s\n", liste[nb - 1]);
+
+	system("pause");
+}
+
+
+
+/////////////////////////////////////////
+//	FONCTIONS CODEES POUR PROJET IPSI1 //
+/////////////////////////////////////////
+
+IMAGE imDilateV4(IMAGE img)
+{
+	// Définition de l'élément structurant V4
+	IMAGE strel = allocationImage(3, 3);
+	strel.pixel[0][0] = 0;
+	strel.pixel[0][1] = 255;
+	strel.pixel[0][2] = 0;
+	strel.pixel[1][0] = 255;
+	strel.pixel[1][1] = 255;
+	strel.pixel[1][2] = 255;
+	strel.pixel[2][0] = 0;
+	strel.pixel[2][1] = 255;
+	strel.pixel[2][2] = 0;
+	int nbligStrelX = 3, nbligStrelY = 3;
+
+	
+	unsigned char valApropager = NULL;
+	int coordRelativeImageX = 0, coordRelativeImageY = 0;
+	int centreStrelX = (nbligStrelX/2), centreStrelY = (nbligStrelY/2);
+	int tailleTableau255strel = 0;
+
+	// Parcours de l'élément structurant pour récupérer le nombre de pixels appartenant au voisinage
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				tailleTableau255strel += 2;
+				
+			}
+		}
+	}
+
+	TABLEAU_INT coordRelXY = allocationTableau(tailleTableau255strel);
+	int compteur = 0;
+
+	// Deuxième parcours de l'élément structurant pour enregistrer les coordonées relatives des pixels du voisinage à 
+	// appliquer directement à l'image pour rechercher la valeur à propager
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				coordRelativeImageX = n - centreStrelX;
+				coordRelativeImageY = m - centreStrelY;
+				coordRelXY.data[compteur] = coordRelativeImageX;
+				coordRelXY.data[compteur + 1] = coordRelativeImageY;
+				compteur += 2;
+			}
+		}
+	}
+
+	
+	IMAGE imgReplicated = imgReplicate(img);
+	IMAGE dilated = allocationImage(img.Nblig, img.Nbcol);
+
+	// Retient la plus grande valeur présente dans le voisinage et l'applique à l'image de sortie
+	for (int i = 1; i < imgReplicated.Nblig - 1; i++)
+	{
+		for (int j = 1; j < imgReplicated.Nbcol - 1; j++)
+		{
+			valApropager = 0;
+			for (int k = 0; k < coordRelXY.size; k+= 2)
+			{
+				if (imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]] > valApropager)
+				{
+					valApropager = imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]];
+				}
+			}
+			dilated.pixel[i - 1][j - 1] = valApropager;
+		}
+	}
+
+	liberationImage(&imgReplicated);
+	liberationImage(&strel);
+	liberationTableau(&coordRelXY);
+	
+	return dilated;
+
+}
+
+IMAGE imgReplicate(IMAGE img)
+{
+	IMAGE imgReplicated = allocationImage(img.Nblig + 2, img.Nbcol + 2); // Création de l'image avec bords dupliqués
+
+	// Duplication des pixels des quatres coins
+	imgReplicated.pixel[0][0] = img.pixel[0][0];
+	imgReplicated.pixel[0][imgReplicated.Nbcol - 1] = img.pixel[0][img.Nbcol - 1];
+	imgReplicated.pixel[imgReplicated.Nblig - 1][0] = img.pixel[img.Nblig - 1][0];
+	imgReplicated.pixel[imgReplicated.Nblig - 1][imgReplicated.Nbcol - 1] = img.pixel[img.Nblig - 1][img.Nbcol - 1];
+
+	// Duplication des pixels des bords
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		imgReplicated.pixel[i + 1][0] = img.pixel[i][0];
+		imgReplicated.pixel[i + 1][imgReplicated.Nbcol - 1] = img.pixel[i][img.Nbcol - 1];
+		imgReplicated.pixel[0][i + 1] = img.pixel[0][i];
+		imgReplicated.pixel[imgReplicated.Nblig - 1][i + 1] = img.pixel[img.Nblig - 1][i];
+	}
+
+	// Insertion de l'image originale dans l'image agrandie
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			imgReplicated.pixel[i + 1][j + 1] = img.pixel[i][j];
+		}
+	}
+
+
+	return imgReplicated;
+}
+
+IMAGE imgTroncature(IMAGE img)
+{
+	IMAGE imgTronquee = allocationImage(img.Nblig - 2, img.Nbcol - 2);
+	for (int i = 0; i < imgTronquee.Nblig; i++)
+	{
+		for (int j = 0; j < imgTronquee.Nbcol; j++)
+		{
+			imgTronquee.pixel[i][j] = img.pixel[i + 1][j + 1];
+		}
+	}
+
+	return imgTronquee;
+}
+
+IMAGE strelV4(void)
+{
+	IMAGE strel = allocationImage(3, 3);
+	strel.pixel[0][0] = 0;
+	strel.pixel[0][1] = 255;
+	strel.pixel[0][2] = 0;
+	strel.pixel[1][0] = 255;
+	strel.pixel[1][1] = 255;
+	strel.pixel[1][2] = 255;
+	strel.pixel[2][0] = 0;
+	strel.pixel[2][1] = 255;
+	strel.pixel[2][2] = 0;
+
+	strel.Nblig = 3;
+	strel.Nbcol = 3;
+
+	return strel;
+}
+
+IMAGE imDilate(IMAGE img, IMAGE strel)
+{
+	
+	int nbligStrelX = strel.Nblig;
+	int nbligStrelY = strel.Nbcol;
+
+
+	unsigned char valApropager = NULL;
+	int coordRelativeImageX = 0, coordRelativeImageY = 0;
+	int centreStrelX = (nbligStrelX / 2), centreStrelY = (nbligStrelY / 2);
+	int tailleTableau255strel = 0;
+
+	// Parcours de l'élément structurant pour récupérer le nombre de pixels appartenant au voisinage
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				tailleTableau255strel += 2;
+
+			}
+		}
+	}
+
+	TABLEAU_INT coordRelXY = allocationTableau(tailleTableau255strel);
+	int compteur = 0;
+
+	// Deuxième parcours de l'élément structurant pour enregistrer les coordonées relatives des pixels du voisinage à 
+	// appliquer directement à l'image pour rechercher la valeur à propager
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				coordRelativeImageX = n - centreStrelX;
+				coordRelativeImageY = m - centreStrelY;
+				coordRelXY.data[compteur] = coordRelativeImageX;
+				coordRelXY.data[compteur + 1] = coordRelativeImageY;
+				compteur += 2;
+			}
+		}
+	}
+
+	// Agrandissement de l'image autant de fois que necessaire (dépend de la taille de l'élement structurant)
+	IMAGE imgReplicated = imgReplicate(img);
+	IMAGE imgReplicatedTempo = { 0, 0, NULL, NULL };
+	int nbAgrandissementSupp = NULL;
+	if ((strel.Nblig / 2) > 1)
+	{
+		nbAgrandissementSupp = (strel.Nblig / 2) - 1;
+
+		imgReplicatedTempo = imCopy(imgReplicated);
+		liberationImage(&imgReplicated);
+		imgReplicated = imgReplicate(imgReplicatedTempo);
+
+		for (int i = 1; i < nbAgrandissementSupp; i++)
+		{
+			liberationImage(&imgReplicatedTempo);
+			imgReplicatedTempo = imCopy(imgReplicated);
+			liberationImage(&imgReplicated);
+			imgReplicated = imgReplicate(imgReplicatedTempo);
+		}
+		liberationImage(&imgReplicatedTempo);
+	}
+	int nbAgrandissement = nbAgrandissementSupp + 1;
+
+	IMAGE dilated = allocationImage(img.Nblig, img.Nbcol);
+
+	// Retient la plus grande valeur présente dans le voisinage et l'applique à l'image de sortie
+	for (int i = nbAgrandissement; i < imgReplicated.Nblig - nbAgrandissement; i++)
+	{
+		for (int j = nbAgrandissement; j < imgReplicated.Nbcol - nbAgrandissement; j++)
+		{
+			valApropager = 0;
+			for (int k = 0; k < coordRelXY.size; k += 2)
+			{
+				if (imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]] > valApropager)
+				{
+					valApropager = imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]];
+				}
+			}
+			dilated.pixel[i - nbAgrandissement][j - nbAgrandissement] = valApropager;
+		}
+	}
+
+	liberationImage(&imgReplicated);
+	liberationTableau(&coordRelXY);
+
+	return dilated;
+}
+
+IMAGE imErode(IMAGE img, IMAGE strel)
+{
+	int nbligStrelX = strel.Nblig;
+	int nbligStrelY = strel.Nbcol;
+
+
+	unsigned char valApropager = NULL;
+	int coordRelativeImageX = 0, coordRelativeImageY = 0;
+	int centreStrelX = (nbligStrelX / 2), centreStrelY = (nbligStrelY / 2);
+	int tailleTableau255strel = 0;
+
+	// Parcours de l'élément structurant pour récupérer le nombre de pixels appartenant au voisinage
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				tailleTableau255strel += 2;
+
+			}
+		}
+	}
+
+	TABLEAU_INT coordRelXY = allocationTableau(tailleTableau255strel);
+	int compteur = 0;
+
+	// Deuxième parcours de l'élément structurant pour enregistrer les coordonées relatives des pixels du voisinage à 
+	// appliquer directement à l'image pour rechercher la valeur à propager
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				coordRelativeImageX = n - centreStrelX;
+				coordRelativeImageY = m - centreStrelY;
+				coordRelXY.data[compteur] = coordRelativeImageX;
+				coordRelXY.data[compteur + 1] = coordRelativeImageY;
+				compteur += 2;
+			}
+		}
+	}
+
+	// Agrandissement de l'image autant de fois que necessaire (dépend de la taille de l'élement structurant)
+	IMAGE imgReplicated = imgReplicate(img);
+	IMAGE imgReplicatedTempo = { 0, 0, NULL, NULL };
+	int nbAgrandissementSupp = NULL;
+	if ((strel.Nblig / 2) > 1)
+	{
+		nbAgrandissementSupp = (strel.Nblig / 2) - 1;
+
+		imgReplicatedTempo = imCopy(imgReplicated);
+		liberationImage(&imgReplicated);
+		imgReplicated = imgReplicate(imgReplicatedTempo);
+
+		for (int i = 1; i < nbAgrandissementSupp; i++)
+		{
+			liberationImage(&imgReplicatedTempo);
+			imgReplicatedTempo = imCopy(imgReplicated);
+			liberationImage(&imgReplicated);
+			imgReplicated = imgReplicate(imgReplicatedTempo);
+		}
+		liberationImage(&imgReplicatedTempo);
+	}
+	int nbAgrandissement = nbAgrandissementSupp + 1;
+
+	IMAGE dilated = allocationImage(img.Nblig, img.Nbcol);
+
+	// Retient la plus petite valeur présente dans le voisinage et l'applique à l'image de sortie
+	for (int i = nbAgrandissement; i < imgReplicated.Nblig - nbAgrandissement; i++)
+	{
+		for (int j = nbAgrandissement; j < imgReplicated.Nbcol - nbAgrandissement; j++)
+		{
+			valApropager = 255;
+			for (int k = 0; k < coordRelXY.size; k += 2)
+			{
+				if (imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]] < valApropager)
+				{
+					valApropager = imgReplicated.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]];
+				}
+			}
+			dilated.pixel[i - nbAgrandissement][j - nbAgrandissement] = valApropager;
+		}
+	}
+
+	liberationImage(&imgReplicated);
+	liberationTableau(&coordRelXY);
+
+	return dilated;
+}
+
+IMAGE imClose(IMAGE img, IMAGE strel)
+{
+	IMAGE dilated = imDilate(img, strel);
+	IMAGE closed = imErode(dilated, strel);
+	liberationImage(&dilated);
+	return closed;
+}
+
+IMAGE imErodeWith0(IMAGE img, IMAGE strel)
+{
+	int nbligStrelX = strel.Nblig;
+	int nbligStrelY = strel.Nbcol;
+
+
+	unsigned char valApropager = NULL;
+	int coordRelativeImageX = 0, coordRelativeImageY = 0;
+	int centreStrelX = (nbligStrelX / 2), centreStrelY = (nbligStrelY / 2);
+	int tailleTableau255strel = 0;
+
+	// Parcours de l'élément structurant pour récupérer le nombre de pixels appartenant au voisinage
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				tailleTableau255strel += 2;
+
+			}
+		}
+	}
+
+	TABLEAU_INT coordRelXY = allocationTableau(tailleTableau255strel);
+	int compteur = 0;
+
+	// Deuxième parcours de l'élément structurant pour enregistrer les coordonées relatives des pixels du voisinage à 
+	// appliquer directement à l'image pour rechercher la valeur à propager
+	for (int n = 0; n < strel.Nblig; n++)
+	{
+		for (int m = 0; m < strel.Nbcol; m++)
+		{
+			if (strel.pixel[n][m] == 255)
+			{
+				coordRelativeImageX = n - centreStrelX;
+				coordRelativeImageY = m - centreStrelY;
+				coordRelXY.data[compteur] = coordRelativeImageX;
+				coordRelXY.data[compteur + 1] = coordRelativeImageY;
+				compteur += 2;
+			}
+		}
+	}
+
+	// Agrandissement de l'image autant de fois que necessaire (dépend de la taille de l'élement structurant)
+	IMAGE imBigger0 = imBiggerWith0(img);
+
+	int nbAgrandissementSupp = NULL;
+	if ((strel.Nblig / 2) > 1)
+	{
+		nbAgrandissementSupp = (strel.Nblig / 2) - 1;
+		for (int i = 0; i < nbAgrandissementSupp; i++)
+		{
+			imBigger0 = imgReplicate(imBigger0);
+		}
+	}
+	int nbAgrandissement = nbAgrandissementSupp + 1;
+
+	IMAGE dilated = allocationImage(img.Nblig, img.Nbcol);
+
+	// Retient la plus petite valeur présente dans le voisinage et l'applique à l'image de sortie
+	for (int i = nbAgrandissement; i < imBigger0.Nblig - nbAgrandissement; i++)
+	{
+		for (int j = nbAgrandissement; j < imBigger0.Nbcol - nbAgrandissement; j++)
+		{
+			valApropager = 255;
+			for (int k = 0; k < coordRelXY.size; k += 2)
+			{
+				if (imBigger0.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]] < valApropager)
+				{
+					valApropager = imBigger0.pixel[i + coordRelXY.data[k]][j + coordRelXY.data[k + 1]];
+				}
+			}
+			dilated.pixel[i - nbAgrandissement][j - nbAgrandissement] = valApropager;
+		}
+	}
+
+	liberationImage(&imBigger0);
+	liberationTableau(&coordRelXY);
+
+	return dilated;
+}
+
+IMAGE imBiggerWith0(IMAGE img)
+{
+	IMAGE bigger = allocationImage(img.Nblig + 2, img.Nbcol + 2);
+	for (int i = 0; i < bigger.Nbcol; i++)
+	{
+		bigger.pixel[0][i] = 0;
+		bigger.pixel[bigger.Nblig - 1][i] = 0;
+	}
+	for (int i = 0; i < bigger.Nblig; i++)
+	{
+		bigger.pixel[i][0] = 0;
+		bigger.pixel[i][bigger.Nbcol - 1] = 0;
+	}
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			bigger.pixel[i + 1][j + 1] = img.pixel[i][j];
+		}
+	}
+	return bigger;
+}
+
+IMAGE imCloseMATLAB(IMAGE img, IMAGE strel)
+{
+	int nbAggrandissement = strel.Nblig / 2;
+	IMAGE image = { 0, 0, NULL, NULL };
+	IMAGE image2 = { 0, 0, NULL, NULL };
+	image = imBiggerWith0(img);
+	if (nbAggrandissement > 1)
+	{
+		for (int i = 1; i < nbAggrandissement; i++)
+		{
+			if (image.Nbcol != 0)
+				liberationImage(&image2);
+			image2 = imCopy(image);
+			liberationImage(&image);
+			image = imBiggerWith0(image2);
+		}
+		liberationImage(&image2);
+	}
+
+	IMAGE dilated = imDilate(image, strel);
+	IMAGE closed = imErode(dilated, strel);
+	
+	IMAGE OUT = allocationImage(image.Nblig - 2*nbAggrandissement, image.Nbcol - 2*nbAggrandissement);
+	//printf("OUT nblig : %d, nbcol : %d \n", OUT.Nblig, OUT.Nbcol);
+	//printf("closed nblig : %d, nbcol : %d \n", closed.Nblig, closed.Nbcol);
+	for (int i = 0; i < OUT.Nblig; i++)
+	{
+		for (int j = 0; j < OUT.Nbcol; j++)
+		{
+			OUT.pixel[i][j] = closed.pixel[i + nbAggrandissement][j + nbAggrandissement];
+		}
+	}
+
+	liberationImage(&dilated);
+	liberationImage(&closed);
+	liberationImage(&image);
+	return OUT;
+}
+
+IMAGE allocationImage0(int Nblig, int Nbcol)
+{
+	IMAGE mat = { 0,0,NULL,NULL };
+	int i;
+
+	mat.Nblig = Nblig;
+	mat.Nbcol = Nbcol;
+	mat.data = (unsigned char*)calloc(Nblig*Nbcol, sizeof(unsigned char));
+	if (mat.data == NULL)
+		return(mat);
+	mat.pixel = (unsigned char**)calloc(Nblig, sizeof(unsigned char*));
+	if (mat.pixel == NULL) {
+		free(mat.data);
+		mat.data = NULL;
+		return(mat);
+	}
+	for (i = 0; i<Nblig; i++)
+		mat.pixel[i] = &mat.data[i*Nbcol];
+
+	return(mat);
+}
+
+
+int nbTransitions01forSkel(int voisinage01[])
+{
+	int nbTransitions = 0;
+	for (int i = 0; i < 7; i++)
+	{
+		if ((voisinage01[i] == 0) & (voisinage01[i + 1] == 1))
+			nbTransitions++;
+	}
+	if ((voisinage01[7] == 0) & (voisinage01[0] == 1))
+		nbTransitions++;
+
+	return nbTransitions;
+}
+
+IMAGE imSkelApprox(IMAGE img) // Opti possible en testant d'abord si le pixel est un pixel de bord avant de faire des opérations...
+{
+	// Utilisations d'images aggrandies pour pallier aux effets de bords
+	IMAGE imgAggrandie = imBiggerWith0(img);
+	IMAGE imgAggrandie2 = allocationImage0(img.Nblig + 2, img.Nbcol + 2);
+
+	// Initialisation des variables utilisées par la suite
+	int voisinage01[8] = { NULL };
+	int nbVoisins1 = 0;
+	int test;
+	int nbPixInitial = 0;
+	TABLEAU_INT histo = histogrammeImage(imgAggrandie, 0);
+	int nbPixFinal = histo.data[255];
+	liberationTableau(&histo);
+
+	// On enleve des pixels de bords tant que l'image de sortie est différente de l'image entrée
+	while (nbPixInitial != nbPixFinal)
+	{
+		nbPixInitial = nbPixFinal;
+		for (int i = 1; i < img.Nblig + 1; i++)
+		{
+			for (int j = 1; j < img.Nbcol + 1; j++)
+			{
+				// Construction du vecteur voisinage (LUT pour opti utile ?)
+				if (imgAggrandie.pixel[i - 1][j] == 0)
+					voisinage01[0] = 0;
+				else
+					voisinage01[0] = 1;
+
+				if (imgAggrandie.pixel[i - 1][j + 1] == 0)
+					voisinage01[1] = 0;
+				else
+					voisinage01[1] = 1;
+
+				if (imgAggrandie.pixel[i][j + 1] == 0)
+					voisinage01[2] = 0;
+				else
+					voisinage01[2] = 1;
+
+				if (imgAggrandie.pixel[i + 1][j + 1] == 0)
+					voisinage01[3] = 0;
+				else
+					voisinage01[3] = 1;
+
+				if (imgAggrandie.pixel[i + 1][j] == 0)
+					voisinage01[4] = 0;
+				else
+					voisinage01[4] = 1;
+
+				if (imgAggrandie.pixel[i + 1][j - 1] == 0)
+					voisinage01[5] = 0;
+				else
+					voisinage01[5] = 1;
+
+				if (imgAggrandie.pixel[i][j - 1] == 0)
+					voisinage01[6] = 0;
+				else
+					voisinage01[6] = 1;
+
+				if (imgAggrandie.pixel[i - 1][j - 1] == 0)
+					voisinage01[7] = 0;
+				else
+					voisinage01[7] = 1;
+
+				// Calcul du nombre de voisins V8 = 1
+				nbVoisins1 = 0;
+				for (int n = 0; n < 8; n++)
+					nbVoisins1 += voisinage01[n];
+
+				// Vérification des conditions de suppression et création de l'image de sortie en conséquence
+				if ((nbVoisins1 >= 2) & (nbVoisins1 <= 6))
+				{
+					if ((nbTransitions01forSkel(voisinage01) == 1) & (voisinage01[0] * voisinage01[2] * voisinage01[4] == 0) & (voisinage01[2] * voisinage01[4] * voisinage01[6] == 0))
+						imgAggrandie2.pixel[i][j] = 0;
+					else
+						imgAggrandie2.pixel[i][j] = imgAggrandie.pixel[i][j];
+				}
+				else
+					imgAggrandie2.pixel[i][j] = imgAggrandie.pixel[i][j];
+			}
+		}
+
+		for (int i = 1; i < img.Nblig + 1; i++)
+		{
+			for (int j = 1; j < img.Nbcol + 1; j++)
+			{
+				// Construction du vecteur voisinage (LUT pour opti utile ?)
+				if (imgAggrandie2.pixel[i - 1][j] == 0)
+					voisinage01[0] = 0;
+				else
+					voisinage01[0] = 1;
+
+				if (imgAggrandie2.pixel[i - 1][j + 1] == 0)
+					voisinage01[1] = 0;
+				else
+					voisinage01[1] = 1;
+
+				if (imgAggrandie2.pixel[i][j + 1] == 0)
+					voisinage01[2] = 0;
+				else
+					voisinage01[2] = 1;
+
+				if (imgAggrandie2.pixel[i + 1][j + 1] == 0)
+					voisinage01[3] = 0;
+				else
+					voisinage01[3] = 1;
+
+				if (imgAggrandie2.pixel[i + 1][j] == 0)
+					voisinage01[4] = 0;
+				else
+					voisinage01[4] = 1;
+
+				if (imgAggrandie2.pixel[i + 1][j - 1] == 0)
+					voisinage01[5] = 0;
+				else
+					voisinage01[5] = 1;
+
+				if (imgAggrandie2.pixel[i][j - 1] == 0)
+					voisinage01[6] = 0;
+				else
+					voisinage01[6] = 1;
+
+				if (imgAggrandie2.pixel[i - 1][j - 1] == 0)
+					voisinage01[7] = 0;
+				else
+					voisinage01[7] = 1;
+
+				// Calcul du nombre de voisins V8 = 1
+				nbVoisins1 = 0;
+				for (int n = 0; n < 8; n++)
+					nbVoisins1 += voisinage01[n];
+
+				// Vérification des conditions de suppression et création de l'image de sortie en conséquence
+				if ((nbVoisins1 >= 2) & (nbVoisins1 <= 6))
+				{
+					if ((nbTransitions01forSkel(voisinage01) == 1) & (voisinage01[0] * voisinage01[2] * voisinage01[6] == 0) & (voisinage01[0] * voisinage01[4] * voisinage01[6] == 0))
+						imgAggrandie.pixel[i][j] = 0;
+					else
+						imgAggrandie.pixel[i][j] = imgAggrandie2.pixel[i][j];
+				}
+				else
+					imgAggrandie.pixel[i][j] = imgAggrandie2.pixel[i][j];
+
+			}
+		}
+		histo = histogrammeImage(imgAggrandie, 0);
+		nbPixFinal = histo.data[255];
+		liberationTableau(&histo);
+	}
+
+	liberationImage(&imgAggrandie2);
+	IMAGE troncature = imgTroncature(imgAggrandie);
+	liberationImage(&imgAggrandie);
+	return troncature;
+}
+
+IMAGE imSpur1(IMAGE img)
+{
+	IMAGE spurAg = imBiggerWith0(img);
+	IMAGE spur = allocationImage(img.Nblig, img.Nbcol);
+	int passage = 0;
+	int nbPixInitial = 0;
+	
+	for (int i = 1; i < img.Nblig + 1; i++)
+	{
+		for (int j = 1; j < img.Nbcol + 1; j++)
+		{
+			passage = 0;
+			// Si le pixel objet est sur un bord, il faut le mettre à 0
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i][j - 1] == 255) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 0) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j] == 255) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 0) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 0) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i][j + 1] == 255) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 0) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 0) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 0) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 255) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 255) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 0) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 0) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 0) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 255) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 0) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 0) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 0) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 255) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 0) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			if ((spurAg.pixel[i][j] == 255) & (spurAg.pixel[i - 1][j - 1] == 0) & (spurAg.pixel[i - 1][j] == 0) & (spurAg.pixel[i - 1][j + 1] == 0) & (spurAg.pixel[i][j + 1] == 0) & (spurAg.pixel[i + 1][j + 1] == 0) & (spurAg.pixel[i + 1][j] == 0) & (spurAg.pixel[i + 1][j - 1] == 255) & (spurAg.pixel[i][j - 1] == 0))
+			{
+				spur.pixel[i - 1][j - 1] = 0;
+				passage = 1;
+			}
+
+			// Si aucune des conditions précédentes sont vérifiée, le pixel est inchangé
+			if (passage == 0)
+				spur.pixel[i - 1][j - 1] = spurAg.pixel[i][j];
+		}
+	}
+
+	liberationImage(&spurAg);
+	return spur;
+}
+
+IMAGE imSpurInf(IMAGE img)
+{
+	IMAGE spur = imSpur1(img);
+	IMAGE spur2 = { 0, 0, NULL, NULL };
+	TABLEAU_INT histo = histogrammeImage(spur, 0);
+	int nbPixinitial = 0;
+	int nbPixFinal = histo.data[255];
+
+	// On enleve les pixels des extrémités un par un tant que ça change l'image
+	while (nbPixinitial != nbPixFinal)
+	{
+		nbPixinitial = nbPixFinal;
+
+		spur2 = imSpur1(spur);
+		liberationImage(&spur);
+		spur = imCopy(spur2);
+		liberationImage(&spur2);
+
+		liberationTableau(&histo);
+		histo = histogrammeImage(spur, 0);
+		nbPixFinal = histo.data[255];
+	}
+	liberationTableau(&histo);
+	return spur;
+}
+
+IMAGE imFill(IMAGE img)
+{
+	IMAGE fill = allocationImage0(img.Nblig, img.Nbcol);
+	int bord_gauche = 0;
+	int bord_droite = img.Nbcol - 1;
+	int detection = 0;
+	int j = 0;
+
+	int test;
+
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		// Détection du rang de la première occurence d'une valeur à 255 en partant de la gauche
+		detection = 0;
+		bord_gauche = -1;
+		j = 0;
+		while ((j < img.Nbcol) & (detection == 0))
+		{
+			if (img.pixel[i][j] == 255)
+			{
+				bord_gauche = j;
+				detection = 1;
+			}
+			j++;
+		}
+
+		// Détection du rang de la première occurence d'une valeur à 255 en partant de la droite
+		detection = 0;
+		bord_droite = -1;
+		j = img.Nbcol-1;
+		while ((j >= 0) & (detection == 0))
+		{
+			if (img.pixel[i][j] == 255)
+			{
+				bord_droite = j;
+				detection = 1;
+			}
+			j--;
+		}
+
+		// Mise à 255 des pixels entre les deux bords --> provoque des bug si plusieurs trous à combler sur la même ligne
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (bord_gauche == -1)
+				fill.pixel[i][j] = 0;
+			else if ((j >= bord_gauche) & (j <= bord_droite))
+				fill.pixel[i][j] = 255;
+			else if ((j <= bord_gauche) | (j >= bord_droite))
+				fill.pixel[i][j] = 0;
+		}
+	}
+	return fill;
+}
+
+
+void numDiskToString(int num, char *chaineTaille11) //On pourrai remplacer beacuoup d'insctructions en utilisant la fonction sprintf comme fait dans detectionCercle
+{
+	// Création du numéro
+	int a = num / 10;
+	int b = num % 10;
+	char carac1[3];
+	carac1[0] = '0' + a;
+	carac1[1] = '0' + b;
+	carac1[2] = '\0';
+
+	if (carac1[0] == '0')
+	{
+		carac1[0] = carac1[1];
+		carac1[1] = carac1[2];
+	}
+
+	// Concaténation avec la chaine "disk"
+	char disk[11] = "disk";
+	strncat(disk, carac1, 2);
+
+	// Concaténation avec la chaibe ".pgm"
+	char pgm[5] = ".pgm";
+	strncat(disk, pgm, 4);
+
+	// Copie de la chaine construite dans le chaine envoyée comme argument dans la fonction
+	char caracCopie = disk[0];
+	int i = 0;
+	while (caracCopie != '\0')
+	{
+		chaineTaille11[i] = caracCopie;
+		i++;
+		caracCopie = disk[i];
+	}
+	chaineTaille11[i] = '\0';
+}
+
+void detectionCercleFIX(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL    // EN COURS DE DEV
+{
+	// Seuillage et inversion de l'image de base
+	IMAGE seuillee = seuillageOtsu(img);
+	IMAGE BW = inverseImage(seuillee);
+	IMAGE SE = { 0,0,NULL, NULL };
+	IMAGE SKEL = { 0,0,NULL, NULL };
+	IMAGE FILL = { 0,0,NULL, NULL };
+
+	// Vecteur de stockage des surfaces des boucles détectée
+	TABLEAU_INT surfaces = allocationTableau(13);
+	int *max;
+	int *indice;
+
+	// Définition des différentes composantes du nom de sauvegarde
+	char chaineSauvegarde[21] = "..\\\\..\\\\Res\\\\"; // Quand on met '\\', seul '\' est pris en compte donc on en met deux fois plus
+	char chaineOUT[4] = "OUT";
+	char troisPremiersChiffres[4];
+	troisPremiersChiffres[0] = nomImage[0];
+	troisPremiersChiffres[1] = nomImage[1];
+	troisPremiersChiffres[2] = nomImage[2];
+	troisPremiersChiffres[3] = '\0';
+	char ChaineNumero[4] = "";
+	char chaineDynamique[27];
+
+	// Construction de la partie statique du chemin de sauvegarde. Càd "OUT" & 3premiersNumImage & '-'
+	strncat(chaineSauvegarde, chaineOUT, 3);
+	strncat(chaineSauvegarde, troisPremiersChiffres, 3);
+	strncat(chaineSauvegarde, "-", 1);
+	chaineSauvegarde[20] = '\0';
+
+	for (int i = 0; i < 13; i++)
+	{
+		// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+		char imAouvrir[11];
+		numDiskToString(i, imAouvrir);
+
+		// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+		SE = lectureImage(imAouvrir);
+		//printf("-----SE ouvert par fonction detection cercle : %s \n", imAouvrir);
+		SKEL = imCloseMATLAB(BW, SE);
+		SKEL = imSkelApprox(SKEL);
+		FILL = imSpurInf(SKEL);
+		FILL = imFill(FILL);
+
+		// Construction de la partie dynamique du chemin de sauvegarde : Càd chaineStatique & chaineNumero & ".pgm"
+		for (int compteur = 0; compteur < 20; compteur++)
+		{
+			chaineDynamique[compteur] = chaineSauvegarde[compteur];
+		}
+		chaineDynamique[20] = '\0';
+
+		sprintf(ChaineNumero, "%d", i); // Met dans ChaineNumero le numero i sous forme de chaine de caractère
+		strncat(chaineDynamique, ChaineNumero, 3);
+		strncat(chaineDynamique, ".pgm", 4);
+
+		// Sauvegarde de l'image issue de TOUTES les opérations (image FILL)
+		//printf("*****Chemin de sauvegarde fonction detection cercle : %s \n", chaineDynamique);
+		sauvegardeImage(FILL, "P5", chaineDynamique);
+
+		// Calcul de surface des boucles détectées
+		surfaces.data[i] = histogrammeImage(FILL,0).data[255];
+	}
+
+	maxETindTabInt(surfaces, &max, &indice);
+
+
+	// Liberation de la mémoire allouée
+	liberationImage(&seuillee);
+	liberationImage(&BW);
+	liberationImage(&SE);
+	liberationImage(&SKEL);
+	liberationImage(&FILL);
+	liberationTableau(&surfaces);
+}
+
+void detectionCercleV2(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL    // EN COURS DE DEV
+{
+	// Seuillage et inversion de l'image de base
+	IMAGE seuillee = seuillageOtsu(img);
+	IMAGE BW = inverseImage(seuillee);
+	IMAGE SE = { 0,0,NULL, NULL };
+	IMAGE SKEL = { 0,0,NULL, NULL };
+	IMAGE FILL = { 0,0,NULL, NULL };
+
+	// Vecteur de stockage des surfaces des boucles détectée
+	TABLEAU_INT surfaces = allocationTableau(13);
+	int *max;
+	int *indice;
+
+	// Définition des différentes composantes du nom de sauvegarde
+	char chaineSauvegarde[21] = "..\\\\..\\\\Res\\\\"; // Quand on met '\\', seul '\' est pris en compte donc on en met deux fois plus
+	char chaineOUT[4] = "OUT";
+	char troisPremiersChiffres[4];
+	troisPremiersChiffres[0] = nomImage[0];
+	troisPremiersChiffres[1] = nomImage[1];
+	troisPremiersChiffres[2] = nomImage[2];
+	troisPremiersChiffres[3] = '\0';
+	char ChaineNumero[4] = "";
+	char chaineDynamique[27];
+
+	// Construction de la partie statique du chemin de sauvegarde. Càd "OUT" & 3premiersNumImage & '-'
+	strncat(chaineSauvegarde, chaineOUT, 3);
+	strncat(chaineSauvegarde, troisPremiersChiffres, 3);
+	strncat(chaineSauvegarde, "-", 1);
+	chaineSauvegarde[20] = '\0';
+
+	for (int i = 0; i < 13; i++)
+	{
+		// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+		char imAouvrir[11];
+		numDiskToString(i, imAouvrir);
+
+		// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+		SE = lectureImage(imAouvrir);
+		//printf("-----SE ouvert par fonction detection cercle : %s \n", imAouvrir);
+		SKEL = imCloseMATLAB(BW, SE);
+		SKEL = imSkelApprox(SKEL);
+		FILL = imSpurInf(SKEL);
+		FILL = imFill(FILL);
+
+		
+
+		// Calcul de surface des boucles détectées
+		surfaces.data[i] = histogrammeImage(FILL, 0).data[255];
+	}
+
+	maxETindTabInt(surfaces, &max, &indice);
+
+	// Construction de la partie dynamique du chemin de sauvegarde : Càd chaineStatique & chaineNumero & ".pgm"
+	for (int compteur = 0; compteur < 20; compteur++)
+	{
+		chaineDynamique[compteur] = chaineSauvegarde[compteur];
+	}
+	chaineDynamique[20] = '\0';
+
+	sprintf(ChaineNumero, "%d", indice); // Met dans ChaineNumero le numero i sous forme de chaine de caractère
+	strncat(chaineDynamique, ChaineNumero, 3);
+	strncat(chaineDynamique, ".pgm", 4);
+
+	// On refait toutes les opérations morphologiques sur l'image qui nous renvoie la meilleure détection de boucle (i.e la plus grande aire)
+	// ----
+	// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+	char imAouvrir[11];
+	numDiskToString(indice, imAouvrir);
+	// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+	SE = lectureImage(imAouvrir);
+	SKEL = imCloseMATLAB(BW, SE);
+	SKEL = imSkelApprox(SKEL);
+	FILL = imSpurInf(SKEL);
+	FILL = imFill(FILL);
+	// ----
+
+	// Sauvegarde de l'image issue de TOUTES les opérations (image FILL)
+	printf("Valeur de indice : %d \n", indice);
+	printf("*****Chemin de sauvegarde fonction detection cercle : %s \n", chaineDynamique);
+	sauvegardeImage(FILL, "P5", chaineDynamique);
+
+
+	// Liberation de la mémoire allouée
+	liberationImage(&seuillee);
+	liberationImage(&BW);
+	liberationImage(&SE);
+	liberationImage(&SKEL);
+	liberationImage(&FILL);
+	liberationTableau(&surfaces);
+}
+
+void detectionCercleForAll()
+{
+	char nomImage[8];
+	char intToStr[4];
+	IMAGE img = { 0,0,NULL,NULL };
+	/*
+	for (int i = 1; i < 10; i++)
+	{
+		// Création du nom de l'image à ouvrir
+		nomImage[0] = '0';
+		nomImage[1] = '0';
+		nomImage[2] = '\0';
+		sprintf(intToStr, "%d", i);
+		strncat(nomImage, intToStr, 1);
+		strncat(nomImage, ".pgm", 4);
+		nomImage[7] = '\0';
+		printf("Chaine : %s \n", nomImage);
+
+		// Ouverture de l'image
+		img = lectureImage(nomImage);
+
+		// Appel de la fonction de détection
+		detectionCercleV2saveSkel(img, nomImage);
+		liberationImage(&img);
+	}
+	
+	
+	for (int i = 10; i < 100; i++)
+	{
+		// Création du nom de l'image à ouvrir
+		nomImage[0] = '0';
+		nomImage[1] = '\0';
+		sprintf(intToStr, "%d", i);
+		strncat(nomImage, intToStr, 2);
+		strncat(nomImage, ".pgm", 4);
+		nomImage[7] = '\0';
+		printf("Chaine : %s \n", nomImage);
+
+		// Ouverture de l'image
+		img = lectureImage(nomImage);
+
+		// Appel de la fonction de détection
+		detectionCercleV2saveSkel(img, nomImage);
+		liberationImage(&img);
+	}
+	*/
+	for (int i = 340; i < 388; i++)
+	{
+		// Création du nom de l'image à ouvrir
+		nomImage[0] = '\0';
+		sprintf(intToStr, "%d", i);
+		strncat(nomImage, intToStr, 3);
+		strncat(nomImage, ".pgm", 4);
+		nomImage[7] = '\0';
+		printf("Chaine : %s \n", nomImage);
+
+		// Ouverture de l'image
+		img = lectureImage(nomImage);
+
+		// Appel de la fonction de détection
+		detectionCercleV2saveSkel(img, nomImage);
+		liberationImage(&img);
+	}
+}
+
+int nbPix255haut(IMAGE img)
+{
+	int h[256];
+	h[0] = 0;
+	h[255] = 0;
+
+	// Histogramme de l'image uniquemet sur la partie haute de celle-ci
+	for (int i = 0; i < (img.Nblig/2); i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			h[(int)img.pixel[i][j]] += 1;
+		}
+	}
+	return h[255];
+}
+
+int nbPix255bas(IMAGE img)
+{
+	int h[256];
+	h[0] = 0;
+	h[255] = 0;
+
+	// Histogramme de l'image uniquemet sur la partie basse de celle-ci
+	for (int i = (img.Nblig / 2); i < 100; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			h[(int)img.pixel[i][j]] += 1;
+		}
+	}
+	return h[255];
+}
+
+void detectionCercleV2saveSkel(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL
+{
+	// Seuillage et inversion de l'image de base
+	IMAGE seuillee = seuillageOtsu(img);
+	IMAGE BW = inverseImage(seuillee);
+	IMAGE SE = { 0,0,NULL, NULL };
+	IMAGE SKEL = { 0,0,NULL, NULL };
+	IMAGE SPUR = { 0,0,NULL, NULL };
+	IMAGE FILL = { 0,0,NULL, NULL };
+
+	// Vecteur de stockage des surfaces des boucles détectée
+	TABLEAU_INT surfaces = allocationTableau(13);
+	int *max;
+	int *indice;
+
+	// Définition des différentes composantes du nom de sauvegarde
+	char chaineSauvegarde[21] = "..\\\\..\\\\Res\\\\"; // Quand on met '\\', seul '\' est pris en compte donc on en met deux fois plus
+	char chaineOUT[4] = "OUT";
+	char troisPremiersChiffres[4];
+	troisPremiersChiffres[0] = nomImage[0];
+	troisPremiersChiffres[1] = nomImage[1];
+	troisPremiersChiffres[2] = nomImage[2];
+	troisPremiersChiffres[3] = '\0';
+	char ChaineNumero[4] = "";
+	char chaineDynamique[27];
+
+	// Construction de la partie statique du chemin de sauvegarde. Càd "OUT" & 3premiersNumImage & '-'
+	strncat(chaineSauvegarde, chaineOUT, 3);
+	strncat(chaineSauvegarde, troisPremiersChiffres, 3);
+	strncat(chaineSauvegarde, "-", 1);
+	chaineSauvegarde[20] = '\0';
+
+	for (int i = 0; i < 13; i++)
+	{
+		// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+		char imAouvrir[11];
+		numDiskToString(i, imAouvrir);
+
+		// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+		SE = lectureImage(imAouvrir);
+		//printf("-----SE ouvert par fonction detection cercle : %s \n", imAouvrir);
+		SKEL = imCloseMATLAB(BW, SE);
+		SKEL = imSkelApprox(SKEL);
+		SPUR = imSpurInf(SKEL);
+		FILL = imFill(SPUR);
+
+
+
+		// Calcul de surface des boucles détectées
+		surfaces.data[i] = histogrammeImage(FILL, 0).data[255];
+	}
+
+	maxETindTabInt(surfaces, &max, &indice);
+
+	// Construction de la partie dynamique du chemin de sauvegarde : Càd chaineStatique & chaineNumero & ".pgm"
+	for (int compteur = 0; compteur < 20; compteur++)
+	{
+		chaineDynamique[compteur] = chaineSauvegarde[compteur];
+	}
+	chaineDynamique[20] = '\0';
+
+	sprintf(ChaineNumero, "%d", indice); // Met dans ChaineNumero le numero i sous forme de chaine de caractère
+	strncat(chaineDynamique, ChaineNumero, 3);
+	strncat(chaineDynamique, ".pgm", 4);
+
+	// On refait toutes les opérations morphologiques sur l'image qui nous renvoie la meilleure détection de boucle (i.e la plus grande aire)
+	// ----
+	// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+	char imAouvrir[11];
+	numDiskToString(indice, imAouvrir);
+	// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+	SE = lectureImage(imAouvrir);
+	SKEL = imCloseMATLAB(BW, SE);
+	SKEL = imSkelApprox(SKEL);
+	SPUR = imSpurInf(SKEL);
+	FILL = imFill(SPUR);
+	// ----
+
+	// Sauvegarde de l'image issue de TOUTES les opérations (image FILL)
+	printf("Valeur de indice : %d \n", indice);
+	printf("*****Chemin de sauvegarde fonction detection cercle : %s \n", chaineDynamique);
+	sauvegardeImage(FILL, "P5", chaineDynamique);
+
+	
+	// Sauvegarde de l'image SKEL
+	char chaineSauvSkel[29];
+	for (int compteur = 0; compteur < 21; compteur++)
+		chaineSauvSkel[compteur] = chaineDynamique[compteur];
+	chaineSauvSkel[21] = '\0';
+	strncat(chaineSauvSkel, "skl", 3);
+	strncat(chaineSauvSkel, ".pgm", 4);
+	printf("Chaine Sauv Skel : %s \n", chaineSauvSkel);
+	sauvegardeImage(SKEL, "P5", chaineSauvSkel);
+
+	// Sauvegarde de l'image SPUR
+	char chaineSauvSpur[29];
+	for (int compteur = 0; compteur < 21; compteur++)
+		chaineSauvSpur[compteur] = chaineDynamique[compteur];
+	chaineSauvSpur[21] = '\0';
+	strncat(chaineSauvSpur, "spr", 3);
+	strncat(chaineSauvSpur, ".pgm", 4);
+	printf("Chaine Sauv Spur : %s \n", chaineSauvSpur);
+	sauvegardeImage(SPUR, "P5", chaineSauvSpur);
+
+
+	// Liberation de la mémoire allouée
+	liberationImage(&seuillee);
+	liberationImage(&BW);
+	liberationImage(&SE);
+	liberationImage(&SKEL);
+	liberationImage(&FILL);
+	liberationTableau(&surfaces);
+	liberationImage(&SPUR);
+}
+
+IMAGE imCopy(IMAGE img)
+{
+	IMAGE imgCopie = { 0,0,NULL,NULL };
+	imgCopie = allocationImage(img.Nblig, img.Nbcol);
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			imgCopie.pixel[i][j] = img.pixel[i][j];
+		}
+	}
+	return imgCopie;
+}
+
+TABLEAU_INT imChainCode(IMAGE img)
+{
+	IMAGE imAgg = { 0,0,NULL,NULL };
+	imAgg = imBiggerWith0(img);
+
+	// Parcours de l'image jusqu'à trouver un pixel blanc (notre point de départ de parcours du contour)
+	int i = 1;
+	int j = 1;
+	int pixelBlanc = 0;
+	int indX = 0;
+	int indY = 0;
+	while ((i < img.Nblig + 1) & (pixelBlanc == 0))
+	{
+		while ((j < img.Nbcol + 1) & (pixelBlanc == 0))
+		{
+			if (imAgg.pixel[i][j] == 255)
+			{
+				pixelBlanc = 1;
+				indX = i;
+				indY = j;
+			}
+			j++;
+		}
+		i++;
+		j = 0;
+	}
+
+	int nbPixBlanc = histogrammeImage(img, 0).data[255];
+	TABLEAU_INT chainCode = allocationTableau(nbPixBlanc); //On bloque la taille de la chain code au nombre de pixels blancs sur l'image
+
+	i = 0;
+	int condition = 0;
+	if ((imAgg.pixel[indX - 1][indY - 1] == 0) & (imAgg.pixel[indX - 1][indY] == 0) & (imAgg.pixel[indX - 1][indY + 1] == 0) & (imAgg.pixel[indX][indY + 1] == 0) & (imAgg.pixel[indX + 1][indY + 1] == 0) & (imAgg.pixel[indX + 1][indY] == 0) & (imAgg.pixel[indX + 1][indY - 1] == 0) & (imAgg.pixel[indX][indY - 1] == 0))
+		condition = 1; // i.e tous les pixels en V8 sont nul --> fin du parcour
+	// Parcours du contour de l'objet et enregistrement de la chain code
+	while ((i < nbPixBlanc) & (condition == 0))
+	{
+		if (imAgg.pixel[indX][indY + 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indY++;
+			chainCode.data[i] = 0;
+		}
+		else if (imAgg.pixel[indX + 1][indY + 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX++;
+			indY++;
+			chainCode.data[i] = 7;
+		}
+		else if (imAgg.pixel[indX + 1][indY] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX++;
+			chainCode.data[i] = 6;
+		}
+		else if (imAgg.pixel[indX + 1][indY - 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX++;
+			indY--;
+			chainCode.data[i] = 5;
+		}
+		else if (imAgg.pixel[indX][indY - 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indY--;
+			chainCode.data[i] = 4;
+		}
+		else if (imAgg.pixel[indX - 1][indY - 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX--;
+			indY--;
+			chainCode.data[i] = 3;
+		}
+		else if (imAgg.pixel[indX - 1][indY] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX--;
+			chainCode.data[i] = 2;
+		}
+		else if (imAgg.pixel[indX - 1][indY + 1] == 255)
+		{
+			imAgg.pixel[indX][indY] = 0;
+			indX--;
+			indY++;
+			chainCode.data[i] = 1;
+		}
+		else
+			condition = 1;
+		
+		i++;
+	}
+
+	liberationImage(&imAgg);
+	return chainCode;
+}
+
+double imPerimeter(IMAGE img)
+{
+	TABLEAU_INT chainCode = imChainCode(img);
+
+	// Parcours de la chain code à l'envers pour détecter le dernier élément non nul (est normalement le dernier à être pertinent
+	// car le point de départ est le premier pixel à 255 en haut à gauche donc ne doit pas finir par des 0)
+	int indiceStopCompris = 0;
+	int i = chainCode.size - 1;
+	while ((i >= 0) & (indiceStopCompris == 0))
+	{
+		if (chainCode.data[i] != 0)
+			indiceStopCompris = i;
+		i--;
+	}
+
+	// Calcul du perimetre en fonction de la parité des valeurs de la chain code
+	double perimeter = 0;
+	for (int j = 0; j <= indiceStopCompris; j++)
+	{
+		if (chainCode.data[j] % 2 == 0)
+			perimeter += 1;
+		else
+			perimeter += 1.4142; // approx de racine de 2
+	}
+
+	return perimeter;
+}
+
+void signatureToCSV(char *repertoire)
+{
+	// Variables pour construction du chemin à ouvrir
+	char nomImg[8];
+	char intToStr[4];
+	// Variables images
+	IMAGE img = { 0, 0, NULL, NULL };
+	IMAGE OUT = { 0, 0, NULL, NULL };
+	IMAGE SKEL = { 0, 0, NULL, NULL };
+	IMAGE SPUR = { 0, 0, NULL, NULL };
+	SIGNATURES_OCR signatures;
+	// Ouverture du flux pour écriture dans fichier CSV
+	FILE *F = NULL;
+	F = fopen("..\\..\\Res\\signatures.csv", "w");
+	// écriture titre colonnes signatures
+	fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n", "NomImage", "Numero", "nbPixBoucleHaut", "nbPixBoucleBas", "Compacity", "distSTDskel", "nbPixSkelQuartBasGauche", "skelXcentreGrav", "skelYcentreGrav", "boucleXcentreGrav", "boucleYcentreGrav", "diffSkelBoucleXcentreGrav", "diffSkelBoucleYcentreGrav", "nbPixDiagInfSkel", "nbPixDiagSupSkel");
+
+
+	// Construction du chemin fixe à partir du repertoire envoyé par l'utitisateur
+	char prefixe[30] = "..\\..\\Images\\";
+	strncat(prefixe, repertoire, 5);
+	strncat(prefixe, "\\", 3);
+
+	if (repertoire == "train")
+	{
+		for (int i = 1; i < 10; i++)
+		{
+			// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+			char chemin[35];
+			for (int i = 0; i < 30; i++)
+				chemin[i] = prefixe[i];
+
+			// Création du nom de l'image à ouvrir
+			nomImg[0] = '0';
+			nomImg[1] = '0';
+			nomImg[2] = '\0';
+			sprintf(intToStr, "%d", i);
+			strncat(nomImg, intToStr, 1);
+			strncat(nomImg, ".pgm", 4);
+			nomImg[7] = '\0';
+
+			strncat(chemin, nomImg, 8);
+
+			img = lectureImage(chemin);
+			OUT = allocationImage0(img.Nblig, img.Nbcol);
+			SKEL = allocationImage0(img.Nblig, img.Nbcol);
+			SPUR = allocationImage0(img.Nblig, img.Nbcol);
+			detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+			// Calcul des signatures
+			signatures.nbPixBoucleHaut = nbPix255haut(OUT);
+			signatures.nbPixBoucleBas = nbPix255bas(OUT);
+			signatures.compacity = imCompacity(OUT, SPUR);
+			signatures.distSTDskel = distSTDcentreGrav(SKEL);
+			signatures.nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+			imCentreGrav(SKEL, &(signatures.skelXcentreGrav), &(signatures.skelYcentreGrav));
+			imCentreGrav(OUT, &(signatures.boucleXcentreGrav), &(signatures.boucleYcentreGrav));
+			signatures.diffSkelBoucleXcentreGrav = signatures.skelXcentreGrav - signatures.boucleXcentreGrav;
+			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
+			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			liberationImage(&img);
+			liberationImage(&OUT);
+			liberationImage(&SKEL);
+			liberationImage(&SPUR);
+		}
+		
+		for (int i = 10; i < 100; i++)
+		{
+			// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+			char chemin[35];
+			for (int i = 0; i < 30; i++)
+				chemin[i] = prefixe[i];
+
+			// Création du nom de l'image à ouvrir
+			nomImg[0] = '0';
+			nomImg[1] = '\0';
+			sprintf(intToStr, "%d", i);
+			strncat(nomImg, intToStr, 2);
+			strncat(nomImg, ".pgm", 4);
+			nomImg[7] = '\0';
+
+			strncat(chemin, nomImg, 8);
+
+			img = lectureImage(chemin);
+			OUT = allocationImage0(img.Nblig, img.Nbcol);
+			SKEL = allocationImage0(img.Nblig, img.Nbcol);
+			SPUR = allocationImage0(img.Nblig, img.Nbcol);
+			detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+			// Calcul des signatures
+			signatures.nbPixBoucleHaut = nbPix255haut(OUT);
+			signatures.nbPixBoucleBas = nbPix255bas(OUT);
+			signatures.compacity = imCompacity(OUT, SPUR);
+			signatures.distSTDskel = distSTDcentreGrav(SKEL);
+			signatures.nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+			imCentreGrav(SKEL, &(signatures.skelXcentreGrav), &(signatures.skelYcentreGrav));
+			imCentreGrav(OUT, &(signatures.boucleXcentreGrav), &(signatures.boucleYcentreGrav));
+			signatures.diffSkelBoucleXcentreGrav = signatures.skelXcentreGrav - signatures.boucleXcentreGrav;
+			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
+			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			liberationImage(&img);
+			liberationImage(&OUT);
+			liberationImage(&SKEL);
+			liberationImage(&SPUR);
+		}
+	
+		for (int i = 100; i < 388; i++)
+		{
+			// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+			char chemin[35];
+			for (int i = 0; i < 30; i++)
+				chemin[i] = prefixe[i];
+
+			// Création du nom de l'image à ouvrir
+			nomImg[0] = '\0';
+			sprintf(intToStr, "%d", i);
+			strncat(nomImg, intToStr, 3);
+			strncat(nomImg, ".pgm", 4);
+			nomImg[7] = '\0';
+
+			strncat(chemin, nomImg, 8);
+
+			img = lectureImage(chemin);
+			OUT = allocationImage0(img.Nblig, img.Nbcol);
+			SKEL = allocationImage0(img.Nblig, img.Nbcol);
+			SPUR = allocationImage0(img.Nblig, img.Nbcol);
+			detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+			// Calcul des signatures
+			signatures.nbPixBoucleHaut = nbPix255haut(OUT);
+			signatures.nbPixBoucleBas = nbPix255bas(OUT);
+			signatures.compacity = imCompacity(OUT, SPUR);
+			signatures.distSTDskel = distSTDcentreGrav(SKEL);
+			signatures.nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+			imCentreGrav(SKEL, &(signatures.skelXcentreGrav), &(signatures.skelYcentreGrav));
+			imCentreGrav(OUT, &(signatures.boucleXcentreGrav), &(signatures.boucleYcentreGrav));
+			signatures.diffSkelBoucleXcentreGrav = signatures.skelXcentreGrav - signatures.boucleXcentreGrav;
+			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
+			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			liberationImage(&img);
+			liberationImage(&OUT);
+			liberationImage(&SKEL);
+			liberationImage(&SPUR);
+		}
+	}
+	else if (repertoire == "test")
+	{
+		for (int i = 388; i < 517; i++) // i < 517 pour toute les mettre
+		{
+			// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+			char chemin[35];
+			for (int i = 0; i < 30; i++)
+				chemin[i] = prefixe[i];
+
+			// Création du nom de l'image à ouvrir
+			nomImg[0] = '\0';
+			sprintf(intToStr, "%d", i);
+			strncat(nomImg, intToStr, 3);
+			strncat(nomImg, ".pgm", 4);
+			nomImg[7] = '\0';
+
+			strncat(chemin, nomImg, 8);
+
+			img = lectureImage(chemin);
+			OUT = allocationImage0(img.Nblig, img.Nbcol);
+			SKEL = allocationImage0(img.Nblig, img.Nbcol);
+			SPUR = allocationImage0(img.Nblig, img.Nbcol);
+			detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+			// Calcul des signatures
+			signatures.nbPixBoucleHaut = nbPix255haut(OUT);
+			signatures.nbPixBoucleBas = nbPix255bas(OUT);
+			signatures.compacity = imCompacity(OUT, SPUR);
+			signatures.distSTDskel = distSTDcentreGrav(SKEL);
+			signatures.nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+			imCentreGrav(SKEL, &(signatures.skelXcentreGrav), &(signatures.skelYcentreGrav));
+			imCentreGrav(OUT, &(signatures.boucleXcentreGrav), &(signatures.boucleYcentreGrav));
+			signatures.diffSkelBoucleXcentreGrav = signatures.skelXcentreGrav - signatures.boucleXcentreGrav;
+			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
+			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			liberationImage(&img);
+			liberationImage(&OUT);
+			liberationImage(&SKEL);
+			liberationImage(&SPUR);
+		}
+	}
+
+	// Fermeture flux et images
+	fclose(F);
+	
+}
+
+void detectionCercle(IMAGE img, IMAGE *OUT, IMAGE *SKEL, IMAGE *SPUR)
+{
+	// Seuillage et inversion de l'image de base
+	IMAGE seuillee = seuillageOtsu(img);
+	IMAGE BW = inverseImage(seuillee);
+	IMAGE SE = { 0,0,NULL, NULL };
+	IMAGE close = { 0, 0, NULL, NULL };
+	TABLEAU_INT histo;
+
+	// Vecteur de stockage des surfaces des boucles détectée
+	TABLEAU_INT surfaces = allocationTableau(13);
+	int *max;
+	int *indice;
+
+	char cheminSE[25] = "..\\..\\Images\\STREL\\";
+	char cheminSEetSE[35];
+
+	for (int i = 0; i < 13; i++)
+	{
+		// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+		char imAouvrir[11];
+		numDiskToString(i, imAouvrir);
+		
+		// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+		liberationImage(&SE);
+		strcpy(cheminSEetSE, cheminSE);
+		strncat(cheminSEetSE, imAouvrir, 10);
+		SE = lectureImage(cheminSEetSE);
+		
+		// Liberation avec allocation
+		liberationImage(&close);
+		liberationImage(SKEL);
+		liberationImage(SPUR);
+		liberationImage(OUT);
+
+		// Réalisation des opérations morphologiques
+		close = imCloseMATLAB(BW, SE);
+		SKEL[0] = imSkelApprox(close);
+		SPUR[0] = imSpurInf(SKEL[0]);
+		OUT[0] = imFill(SPUR[0]);
+
+
+		// Calcul de surface des boucles détectées
+		histo = histogrammeImage(OUT[0], 0);
+		surfaces.data[i] = histo.data[255];
+		liberationTableau(&histo);
+	}
+
+	maxETindTabInt(surfaces, &max, &indice);
+
+	// On refait toutes les opérations morphologiques sur l'image qui nous renvoie la meilleure détection de boucle (i.e la plus grande aire)
+	// ----
+	// Construction du nom de l'élément structurant à ouvrir (pattern : "disk" suivis du numéro suivis de ".pgm")
+	char imAouvrir[11];
+	numDiskToString(indice, imAouvrir);
+	strcpy(cheminSEetSE, cheminSE);
+	strncat(cheminSEetSE, imAouvrir, 10);
+
+	// Libération de mémoire
+	liberationImage(&SE);
+	liberationImage(&close);
+	liberationImage(SKEL);
+	liberationImage(SPUR);
+	liberationImage(OUT);
+
+
+	// Ouverture de l'élément structurant et réalisation des opérations sur l'image
+	SE = lectureImage(cheminSEetSE);
+	close = imCloseMATLAB(BW, SE);
+	SKEL[0] = imSkelApprox(close);
+	SPUR[0] = imSpurInf(SKEL[0]);
+	OUT[0] = imFill(SPUR[0]);
+	// ----
+
+	// Liberation de la mémoire allouée
+	liberationImage(&seuillee);
+	liberationImage(&BW);
+	liberationImage(&SE);
+	liberationTableau(&surfaces);
+	liberationImage(&close);
+}
+
+double imCompacity(IMAGE OUT, IMAGE SPUR)
+{
+	double perimeter = histogrammeImage(SPUR,0).data[255];
+	int surface = histogrammeImage(OUT, 0).data[255];
+	double compacity = ((perimeter*perimeter) / (4 * 3.1415*surface));
+	//printf("%lf %d %lf \n", perimeter, surface, compacity);
+	return compacity;
+}
+
+void imCentreGrav(IMAGE img, double *centreXgrav, double *centreYgrav)
+{
+	*centreXgrav = 0;
+	*centreYgrav = 0;
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (img.pixel[i][j] == 255)
+			{
+				*centreXgrav += i;
+				*centreYgrav += j;
+			}
+		}
+	}
+	TABLEAU_INT histo = histogrammeImage(img, 0);
+	*centreXgrav = *centreXgrav / histo.data[255];
+	*centreYgrav = *centreYgrav / histo.data[255];
+	liberationTableau(&histo);
+}
+
+TABLEAU_DOUBLE imDistPixCentreGrav(IMAGE img)
+{
+	TABLEAU_INT histo = histogrammeImage(img, 0);
+	TABLEAU_DOUBLE distances = allocationTableauDouble(histo.data[255]);
+	double centreXgrav;
+	double centreYgrav;
+	imCentreGrav(img, &centreXgrav, &centreYgrav);
+
+	int compteur = 0;
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (img.pixel[i][j] == 255)
+			{
+				distances.data[compteur] = sqrt(((i - centreXgrav)*(i - centreXgrav)) + ((j - centreYgrav)*(j - centreYgrav)));
+				compteur++;
+			}
+		}
+	}
+
+	liberationTableau(&histo);
+	return distances;
+}
+
+double moyenneTableauDouble(TABLEAU_DOUBLE tab)
+{
+	double moy = 0;
+	for (int i = 0; i < tab.size; i++)
+	{
+		moy += tab.data[i];
+	}
+	moy = moy / tab.size;
+	return moy;
+}
+
+double ecartTypeTableauDouble(TABLEAU_DOUBLE tab)
+{
+	double ecart_type = 0;
+	double moyenne = moyenneTableauDouble(tab);
+
+	for (int i = 0; i < tab.size; i++)
+		ecart_type += (tab.data[i] - moyenne)*(tab.data[i] - moyenne);
+	
+	ecart_type = ecart_type / tab.size;
+	ecart_type = sqrt(ecart_type);
+	
+	return ecart_type;
+}
+
+double distSTDcentreGrav(IMAGE img)
+{
+	TABLEAU_DOUBLE distances = imDistPixCentreGrav(img);
+	double distSTD = ecartTypeTableauDouble(distances);
+	liberationTableauDouble(&distances);
+	return distSTD;
+}
+
+int nbPixQuartBasGauche255(IMAGE img)
+{
+	int nbPix = 0;
+	TABLEAU_INT histoQuartBasGauche = allocationTableau(256);
+	histoQuartBasGauche.data[255] = 0;
+	histoQuartBasGauche.data[0] = 0;
+
+	for (int i = img.Nblig / 2; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol/2; j++)
+		{
+			histoQuartBasGauche.data[img.pixel[i][j]] ++;
+		}
+	}
+	
+	nbPix = histoQuartBasGauche.data[255];
+	liberationTableau(&histoQuartBasGauche);
+	return nbPix;
+}
+
+int nbPixDiagSup255(IMAGE img)
+{
+	int nbPix = 0;
+	TABLEAU_INT histoDiagSup = allocationTableau(256);
+	histoDiagSup.data[255] = 0;
+	histoDiagSup.data[0] = 0;
+
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (j > i)
+				histoDiagSup.data[img.pixel[i][j]] ++;
+		}
+	}
+
+	nbPix = histoDiagSup.data[255];
+	liberationTableau(&histoDiagSup);
+	return nbPix;
+}
+
+int nbPixDiagInf255(IMAGE img)
+{
+	int nbPix = 0;
+	TABLEAU_INT histoDiagSup = allocationTableau(256);
+	histoDiagSup.data[255] = 0;
+	histoDiagSup.data[0] = 0;
+
+	for (int i = 0; i < img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (j < i)
+				histoDiagSup.data[img.pixel[i][j]] ++;
+		}
+	}
+
+	nbPix = histoDiagSup.data[255];
+	liberationTableau(&histoDiagSup);
+	return nbPix;
+}
+
+IMAGE imConvexHull(IMAGE img)
+{
+	IMAGE imgAgg = imBiggerWith0(img);
+	IMAGE imgAgg2 = allocationImage(img.Nblig + 2, img.Nbcol + 2);
+	IMAGE img2 = allocationImage(img.Nblig, img.Nbcol);
+	//IMAGE img2bis = allocationImage(img.Nblig, img.Nbcol);
+	int nbAggrandissement = 1;
+	TABLEAU_INT histo = histogrammeImage(imgAgg, 0);
+	int nbPixAvant = histo.data[255];
+	int nbPixApres = -1;
+
+	// Premier parcours hit or miss de l'image 
+	for (int i = nbAggrandissement; i < img.Nblig + nbAggrandissement; i++)
+	{
+		for (int j = nbAggrandissement; j < img.Nbcol + nbAggrandissement; j++)
+		{
+			if ((imgAgg.pixel[i][j] == 0) & (imgAgg.pixel[i - 1][j - 1] == 255) & (imgAgg.pixel[i][j - 1] == 255) & (imgAgg.pixel[i + 1][j - 1] == 255))
+				img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = 255;
+			else
+				img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = imgAgg.pixel[i][j];
+		}
+		liberationTableau(&histo);
+		histo = histogrammeImage(img2, 0);
+		nbPixApres = histo.data[255];
+	}
+
+	// Hit or miss gauche jusqu'à ne plus avoir de changements sur l'image
+	while (nbPixAvant != nbPixApres)
+	{
+		nbPixAvant = nbPixApres;
+		liberationImage(&imgAgg2);
+		imgAgg2 = imBiggerWith0(img2);
+
+		for (int i = nbAggrandissement; i < img.Nblig + nbAggrandissement; i++)
+		{
+			for (int j = nbAggrandissement; j < img.Nbcol + nbAggrandissement; j++)
+			{
+				if ((imgAgg2.pixel[i][j] == 0) & (imgAgg2.pixel[i - 1][j - 1] == 255) & (imgAgg2.pixel[i][j - 1] == 255) & (imgAgg2.pixel[i + 1][j - 1] == 255))
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = 255;
+				else
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = imgAgg2.pixel[i][j];
+			}
+			liberationTableau(&histo);
+			histo = histogrammeImage(img2, 0);
+			nbPixApres = histo.data[255];
+		}
+
+
+	}
+
+	nbPixApres = -1;
+	while (nbPixAvant != nbPixApres)
+	{
+		nbPixAvant = nbPixApres;
+		liberationImage(&imgAgg2);
+		imgAgg2 = imBiggerWith0(img2);
+
+		for (int i = nbAggrandissement; i < img.Nblig + nbAggrandissement; i++)
+		{
+			for (int j = nbAggrandissement; j < img.Nbcol + nbAggrandissement; j++)
+			{
+				if ((imgAgg2.pixel[i][j] == 0) & (imgAgg2.pixel[i - 1][j - 1] == 255) & (imgAgg2.pixel[i - 1][j] == 255) & (imgAgg2.pixel[i - 1][j + 1] == 255))
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = 255;
+				else
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = imgAgg2.pixel[i][j];
+			}
+			liberationTableau(&histo);
+			histo = histogrammeImage(img2, 0);
+			nbPixApres = histo.data[255];
+		}
+
+
+	}
+
+	nbPixApres = -1;
+	while (nbPixAvant != nbPixApres)
+	{
+		nbPixAvant = nbPixApres;
+		liberationImage(&imgAgg2);
+		imgAgg2 = imBiggerWith0(img2);
+
+		for (int i = nbAggrandissement; i < img.Nblig + nbAggrandissement; i++)
+		{
+			for (int j = nbAggrandissement; j < img.Nbcol + nbAggrandissement; j++)
+			{
+				if ((imgAgg2.pixel[i][j] == 0) & (imgAgg2.pixel[i - 1][j + 1] == 255) & (imgAgg2.pixel[i][j + 1] == 255) & (imgAgg2.pixel[i + 1][j + 1] == 255))
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = 255;
+				else
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = imgAgg2.pixel[i][j];
+			}
+			liberationTableau(&histo);
+			histo = histogrammeImage(img2, 0);
+			nbPixApres = histo.data[255];
+		}
+
+
+	}
+
+	nbPixApres = -1;
+	while (nbPixAvant != nbPixApres)
+	{
+		nbPixAvant = nbPixApres;
+		liberationImage(&imgAgg2);
+		imgAgg2 = imBiggerWith0(img2);
+
+		for (int i = nbAggrandissement; i < img.Nblig + nbAggrandissement; i++)
+		{
+			for (int j = nbAggrandissement; j < img.Nbcol + nbAggrandissement; j++)
+			{
+				if ((imgAgg2.pixel[i][j] == 0) & (imgAgg2.pixel[i + 1][j + 1] == 255) & (imgAgg2.pixel[i + 1][j] == 255) & (imgAgg2.pixel[i + 1][j - 1] == 255))
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = 255;
+				else
+					img2.pixel[i - nbAggrandissement][j - nbAggrandissement] = imgAgg2.pixel[i][j];
+			}
+			liberationTableau(&histo);
+			histo = histogrammeImage(img2, 0);
+			nbPixApres = histo.data[255];
+		}
+
+
+	}
+
+	liberationImage(&imgAgg);
+	liberationImage(&imgAgg2);
+	liberationTableau(&histo);
+	return img2;
+}

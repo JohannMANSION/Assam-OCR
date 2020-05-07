@@ -21,6 +21,11 @@ typedef struct {
 	int *data;
 } TABLEAU_INT;
 
+typedef struct tableau_double {
+	int size;
+	double *data;
+} TABLEAU_DOUBLE;
+
 typedef struct {
 	int min;
 	int max;
@@ -50,6 +55,7 @@ void echangeInt(int *a, int *b);
 int* allocationTableauInt(int n);
 
 TABLEAU_INT allocationTableau(int n);
+TABLEAU_DOUBLE allocationTableauDouble(int n);
 void minMaxTableau(TABLEAU_INT t, int *Min, int *Max);
 MOMENTS momentsTableau(TABLEAU_INT t);
 
@@ -64,8 +70,10 @@ void afficheLigneTriangle(TABLEAU_INT ligne);
 TABLEAU_INT* constructionTriangle(int taille);
 void afficheTriangle(TABLEAU_INT* triangle, int taille);
 void liberationTableau(TABLEAU_INT* h);
+void liberationTableauDouble(TABLEAU_DOUBLE* h);
 
-
+// Fonctions codées pour le projet C IPSI1 :
+void maxETindTabInt(TABLEAU_INT t, int *max, int *indice);
 
 
 

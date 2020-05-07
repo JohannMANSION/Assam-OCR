@@ -136,6 +136,16 @@ TABLEAU_INT allocationTableau(int n)
 	return(t);
 }
 
+TABLEAU_DOUBLE allocationTableauDouble(int n)
+{
+	TABLEAU_DOUBLE t = { 0, NULL };
+
+	t.size = n;
+	t.data = (double*)calloc(n, sizeof(double));
+
+	return(t);
+}
+
 void minMaxTableau(TABLEAU_INT t, int *Min, int *Max) 
 {
 	*Min = t.data[0];
@@ -323,4 +333,25 @@ void liberationTableau(TABLEAU_INT* h)
 {
 	free(h->data);
 	h->data = NULL;
+}
+
+void liberationTableauDouble(TABLEAU_DOUBLE* h)
+{
+	free(h->data);
+	h->data = NULL;
+}
+
+void maxETindTabInt(TABLEAU_INT t, int *max, int *indice)
+{
+	*max = t.data[0];
+	*indice = 0;
+
+	for (int i = 1; i < t.size; i++)
+	{
+		if (t.data[i] > *max)
+		{
+			*max = t.data[i];
+			*indice = i;
+		}
+	}
 }
