@@ -2287,7 +2287,7 @@ void signatureToCSV(char *repertoire)
 	FILE *F = NULL;
 	F = fopen("..\\..\\Res\\signatures.csv", "w");
 	// écriture titre colonnes signatures
-	fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n", "NomImage", "Numero", "nbPixBoucleHaut", "nbPixBoucleBas", "Compacity", "distSTDskel", "nbPixSkelQuartBasGauche", "skelXcentreGrav", "skelYcentreGrav", "boucleXcentreGrav", "boucleYcentreGrav", "diffSkelBoucleXcentreGrav", "diffSkelBoucleYcentreGrav", "nbPixDiagInfSkel", "nbPixDiagSupSkel");
+	fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n", "NomImage", "Numero", "nbPixBoucleHaut", "nbPixBoucleBas", "Compacity", "distSTDskel", "nbPixSkelQuartBasGauche", "skelXcentreGrav", "skelYcentreGrav", "boucleXcentreGrav", "boucleYcentreGrav", "diffSkelBoucleXcentreGrav", "diffSkelBoucleYcentreGrav", "nbPixDiagInfSkel", "nbPixDiagSupSkel", "minorAxisSkel", "majorAxisSkel", "OrientationSkel", "PHI1skel", "PHI2skel", "PHI3skel", "PHI4skel");
 
 
 	// Construction du chemin fixe à partir du repertoire envoyé par l'utitisateur
@@ -2333,8 +2333,15 @@ void signatureToCSV(char *repertoire)
 			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
 			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
 			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+			signatures.minorAxisSkel = MinorAxisEllipse(SKEL);
+			signatures.majorAxisSkel = MajorAxisEllipse(SKEL);
+			signatures.orientationSkel = OrientationEllipse(SKEL);
+			signatures.PHI1skel = imPHI1(SKEL);
+			signatures.PHI2skel = imPHI2(SKEL);
+			signatures.PHI3skel = imPHI3(SKEL);
+			signatures.PHI4skel = imPHI4(SKEL);
 
-			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel, signatures.minorAxisSkel, signatures.majorAxisSkel, signatures.orientationSkel, signatures.PHI1skel, signatures.PHI2skel, signatures.PHI3skel, signatures.PHI4skel);
 			liberationImage(&img);
 			liberationImage(&OUT);
 			liberationImage(&SKEL);
@@ -2376,8 +2383,15 @@ void signatureToCSV(char *repertoire)
 			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
 			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
 			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+			signatures.minorAxisSkel = MinorAxisEllipse(SKEL);
+			signatures.majorAxisSkel = MajorAxisEllipse(SKEL);
+			signatures.orientationSkel = OrientationEllipse(SKEL);
+			signatures.PHI1skel = imPHI1(SKEL);
+			signatures.PHI2skel = imPHI2(SKEL);
+			signatures.PHI3skel = imPHI3(SKEL);
+			signatures.PHI4skel = imPHI4(SKEL);
 
-			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel, signatures.minorAxisSkel, signatures.majorAxisSkel, signatures.orientationSkel, signatures.PHI1skel, signatures.PHI2skel, signatures.PHI3skel, signatures.PHI4skel);
 			liberationImage(&img);
 			liberationImage(&OUT);
 			liberationImage(&SKEL);
@@ -2418,8 +2432,15 @@ void signatureToCSV(char *repertoire)
 			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
 			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
 			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+			signatures.minorAxisSkel = MinorAxisEllipse(SKEL);
+			signatures.majorAxisSkel = MajorAxisEllipse(SKEL);
+			signatures.orientationSkel = OrientationEllipse(SKEL);
+			signatures.PHI1skel = imPHI1(SKEL);
+			signatures.PHI2skel = imPHI2(SKEL);
+			signatures.PHI3skel = imPHI3(SKEL);
+			signatures.PHI4skel = imPHI4(SKEL);
 
-			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel, signatures.minorAxisSkel, signatures.majorAxisSkel, signatures.orientationSkel, signatures.PHI1skel, signatures.PHI2skel, signatures.PHI3skel, signatures.PHI4skel);
 			liberationImage(&img);
 			liberationImage(&OUT);
 			liberationImage(&SKEL);
@@ -2462,8 +2483,15 @@ void signatureToCSV(char *repertoire)
 			signatures.diffSkelBoucleYcentreGrav = signatures.skelYcentreGrav - signatures.boucleYcentreGrav;
 			signatures.nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
 			signatures.nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+			signatures.minorAxisSkel = MinorAxisEllipse(SKEL);
+			signatures.majorAxisSkel = MajorAxisEllipse(SKEL);
+			signatures.orientationSkel = OrientationEllipse(SKEL);
+			signatures.PHI1skel = imPHI1(SKEL);
+			signatures.PHI2skel = imPHI2(SKEL);
+			signatures.PHI3skel = imPHI3(SKEL);
+			signatures.PHI4skel = imPHI4(SKEL);
 
-			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel);
+			fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, signatures.nbPixBoucleHaut, signatures.nbPixBoucleBas, signatures.compacity, signatures.distSTDskel, signatures.nbPixSkelQuartBasGauche, signatures.skelXcentreGrav, signatures.skelYcentreGrav, signatures.boucleXcentreGrav, signatures.boucleYcentreGrav, signatures.diffSkelBoucleXcentreGrav, signatures.diffSkelBoucleYcentreGrav, signatures.nbPixDiagSupSkel, signatures.nbPixDiagInfSkel, signatures.minorAxisSkel, signatures.majorAxisSkel, signatures.orientationSkel, signatures.PHI1skel, signatures.PHI2skel, signatures.PHI3skel, signatures.PHI4skel);
 			liberationImage(&img);
 			liberationImage(&OUT);
 			liberationImage(&SKEL);
@@ -2474,6 +2502,317 @@ void signatureToCSV(char *repertoire)
 	// Fermeture flux et images
 	fclose(F);
 	
+}
+
+TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
+{
+	// Allocation du tableau contenant les signatures des images qui vont être calculées. (dépend des choix de l'utilisateur)
+	TABLEAU_SIGNATURES TAB;
+	if (choix.uneSeuleImage == 0)
+	{
+		if (choix.repertoire == "train")
+			TAB = allocationTableauSignatures(387);
+		else if (choix.repertoire == "test")
+			TAB = allocationTableauSignatures(129);
+	}
+	else if (choix.uneSeuleImage == 1)
+		TAB = allocationTableauSignatures(1);
+
+
+	// Variables pour construction du chemin à ouvrir
+	char nomImg[8];
+	char intToStr[4];
+
+	// Variables images
+	IMAGE img = { 0, 0, NULL, NULL };
+	IMAGE OUT = { 0, 0, NULL, NULL };
+	IMAGE SKEL = { 0, 0, NULL, NULL };
+	IMAGE SPUR = { 0, 0, NULL, NULL };
+
+	// Déclaration du flux
+	FILE *F = NULL;
+
+	if (choix.uneSeuleImage == 0)
+	{
+		// Ouverture du flux pour écriture dans fichier CSV
+		F = fopen("..\\..\\Res\\signatures.csv", "w");
+
+		// écriture titre colonnes signatures
+		fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n", "NomImage", "Numero", "nbPixBoucleHaut", "nbPixBoucleBas", "Compacity", "distSTDskel", "nbPixSkelQuartBasGauche", "skelXcentreGrav", "skelYcentreGrav", "boucleXcentreGrav", "boucleYcentreGrav", "diffSkelBoucleXcentreGrav", "diffSkelBoucleYcentreGrav", "nbPixDiagInfSkel", "nbPixDiagSupSkel", "minorAxisSkel", "majorAxisSkel", "OrientationSkel", "PHI1skel", "PHI2skel", "PHI3skel", "PHI4skel");
+
+
+		// Construction du chemin fixe à partir du repertoire envoyé par l'utitisateur
+		char prefixe[30] = "..\\..\\Images\\";
+		strncat(prefixe, choix.repertoire, 5);
+		strncat(prefixe, "\\", 3);
+
+		if (choix.repertoire == "train")
+		{
+			for (int i = 1; i < 10; i++)
+			{
+				// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+				char chemin[35];
+				for (int i = 0; i < 30; i++)
+					chemin[i] = prefixe[i];
+
+				// Création du nom de l'image à ouvrir
+				nomImg[0] = '0';
+				nomImg[1] = '0';
+				nomImg[2] = '\0';
+				sprintf(intToStr, "%d", i);
+				strncat(nomImg, intToStr, 1);
+				strncat(nomImg, ".pgm", 4);
+				nomImg[7] = '\0';
+
+				strncat(chemin, nomImg, 8);
+
+				img = lectureImage(chemin);
+				OUT = allocationImage0(img.Nblig, img.Nbcol);
+				SKEL = allocationImage0(img.Nblig, img.Nbcol);
+				SPUR = allocationImage0(img.Nblig, img.Nbcol);
+				detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+				// Calcul des signatures
+				TAB.tabSignatures[i - 1].numero = i;
+				TAB.tabSignatures[i - 1].nbPixBoucleHaut = nbPix255haut(OUT);
+				TAB.tabSignatures[i - 1].nbPixBoucleBas = nbPix255bas(OUT);
+				TAB.tabSignatures[i - 1].compacity = imCompacity(OUT, SPUR);
+				TAB.tabSignatures[i - 1].distSTDskel = distSTDcentreGrav(SKEL);
+				TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 1].skelXcentreGrav), &(TAB.tabSignatures[i - 1].skelYcentreGrav));
+				imCentreGrav(OUT, &(TAB.tabSignatures[i - 1].boucleXcentreGrav), &(TAB.tabSignatures[i - 1].boucleYcentreGrav));
+				TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 1].skelXcentreGrav - TAB.tabSignatures[i - 1].boucleXcentreGrav;
+				TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 1].skelYcentreGrav - TAB.tabSignatures[i - 1].boucleYcentreGrav;
+				TAB.tabSignatures[i - 1].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+				TAB.tabSignatures[i - 1].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+				TAB.tabSignatures[i - 1].minorAxisSkel = MinorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].majorAxisSkel = MajorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].orientationSkel = OrientationEllipse(SKEL);
+				TAB.tabSignatures[i - 1].PHI1skel = imPHI1(SKEL);
+				TAB.tabSignatures[i - 1].PHI2skel = imPHI2(SKEL);
+				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
+				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
+
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				liberationImage(&img);
+				liberationImage(&OUT);
+				liberationImage(&SKEL);
+				liberationImage(&SPUR);
+			}
+			
+			for (int i = 10; i < 100; i++)
+			{
+				// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+				char chemin[35];
+				for (int i = 0; i < 30; i++)
+					chemin[i] = prefixe[i];
+
+				// Création du nom de l'image à ouvrir
+				nomImg[0] = '0';
+				nomImg[1] = '\0';
+				sprintf(intToStr, "%d", i);
+				strncat(nomImg, intToStr, 2);
+				strncat(nomImg, ".pgm", 4);
+				nomImg[7] = '\0';
+
+				strncat(chemin, nomImg, 8);
+
+				img = lectureImage(chemin);
+				OUT = allocationImage0(img.Nblig, img.Nbcol);
+				SKEL = allocationImage0(img.Nblig, img.Nbcol);
+				SPUR = allocationImage0(img.Nblig, img.Nbcol);
+				detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+				// Calcul des signatures
+				TAB.tabSignatures[i - 1].numero = i;
+				TAB.tabSignatures[i - 1].nbPixBoucleHaut = nbPix255haut(OUT);
+				TAB.tabSignatures[i - 1].nbPixBoucleBas = nbPix255bas(OUT);
+				TAB.tabSignatures[i - 1].compacity = imCompacity(OUT, SPUR);
+				TAB.tabSignatures[i - 1].distSTDskel = distSTDcentreGrav(SKEL);
+				TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 1].skelXcentreGrav), &(TAB.tabSignatures[i - 1].skelYcentreGrav));
+				imCentreGrav(OUT, &(TAB.tabSignatures[i - 1].boucleXcentreGrav), &(TAB.tabSignatures[i - 1].boucleYcentreGrav));
+				TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 1].skelXcentreGrav - TAB.tabSignatures[i - 1].boucleXcentreGrav;
+				TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 1].skelYcentreGrav - TAB.tabSignatures[i - 1].boucleYcentreGrav;
+				TAB.tabSignatures[i - 1].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+				TAB.tabSignatures[i - 1].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+				TAB.tabSignatures[i - 1].minorAxisSkel = MinorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].majorAxisSkel = MajorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].orientationSkel = OrientationEllipse(SKEL);
+				TAB.tabSignatures[i - 1].PHI1skel = imPHI1(SKEL);
+				TAB.tabSignatures[i - 1].PHI2skel = imPHI2(SKEL);
+				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
+				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
+
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				liberationImage(&img);
+				liberationImage(&OUT);
+				liberationImage(&SKEL);
+				liberationImage(&SPUR);
+			}
+
+			for (int i = 100; i < 388; i++)
+			{
+				// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+				char chemin[35];
+				for (int i = 0; i < 30; i++)
+					chemin[i] = prefixe[i];
+
+				// Création du nom de l'image à ouvrir
+				nomImg[0] = '\0';
+				sprintf(intToStr, "%d", i);
+				strncat(nomImg, intToStr, 3);
+				strncat(nomImg, ".pgm", 4);
+				nomImg[7] = '\0';
+
+				strncat(chemin, nomImg, 8);
+
+				img = lectureImage(chemin);
+				OUT = allocationImage0(img.Nblig, img.Nbcol);
+				SKEL = allocationImage0(img.Nblig, img.Nbcol);
+				SPUR = allocationImage0(img.Nblig, img.Nbcol);
+				detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+				// Calcul des signatures
+				TAB.tabSignatures[i - 1].numero = i;
+				TAB.tabSignatures[i - 1].nbPixBoucleHaut = nbPix255haut(OUT);
+				TAB.tabSignatures[i - 1].nbPixBoucleBas = nbPix255bas(OUT);
+				TAB.tabSignatures[i - 1].compacity = imCompacity(OUT, SPUR);
+				TAB.tabSignatures[i - 1].distSTDskel = distSTDcentreGrav(SKEL);
+				TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 1].skelXcentreGrav), &(TAB.tabSignatures[i - 1].skelYcentreGrav));
+				imCentreGrav(OUT, &(TAB.tabSignatures[i - 1].boucleXcentreGrav), &(TAB.tabSignatures[i - 1].boucleYcentreGrav));
+				TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 1].skelXcentreGrav - TAB.tabSignatures[i - 1].boucleXcentreGrav;
+				TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 1].skelYcentreGrav - TAB.tabSignatures[i - 1].boucleYcentreGrav;
+				TAB.tabSignatures[i - 1].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+				TAB.tabSignatures[i - 1].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+				TAB.tabSignatures[i - 1].minorAxisSkel = MinorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].majorAxisSkel = MajorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].orientationSkel = OrientationEllipse(SKEL);
+				TAB.tabSignatures[i - 1].PHI1skel = imPHI1(SKEL);
+				TAB.tabSignatures[i - 1].PHI2skel = imPHI2(SKEL);
+				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
+				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
+
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				liberationImage(&img);
+				liberationImage(&OUT);
+				liberationImage(&SKEL);
+				liberationImage(&SPUR);
+				
+			}
+			
+		}
+		
+		else if (choix.repertoire == "test")
+		{
+			for (int i = 388; i < 517; i++) // i < 517 pour toute les mettre
+			{
+				// Recopie du chemin fixe pour concaténation variable avec le nom de l'image
+				char chemin[35];
+				for (int i = 0; i < 30; i++)
+					chemin[i] = prefixe[i];
+
+				// Création du nom de l'image à ouvrir
+				nomImg[0] = '\0';
+				sprintf(intToStr, "%d", i);
+				strncat(nomImg, intToStr, 3);
+				strncat(nomImg, ".pgm", 4);
+				nomImg[7] = '\0';
+
+				strncat(chemin, nomImg, 8);
+
+				img = lectureImage(chemin);
+				OUT = allocationImage0(img.Nblig, img.Nbcol);
+				SKEL = allocationImage0(img.Nblig, img.Nbcol);
+				SPUR = allocationImage0(img.Nblig, img.Nbcol);
+				detectionCercle(img, &OUT, &SKEL, &SPUR);
+
+				// Calcul des signatures
+				TAB.tabSignatures[i - 1].numero = i;
+				TAB.tabSignatures[i - 1].nbPixBoucleHaut = nbPix255haut(OUT);
+				TAB.tabSignatures[i - 1].nbPixBoucleBas = nbPix255bas(OUT);
+				TAB.tabSignatures[i - 1].compacity = imCompacity(OUT, SPUR);
+				TAB.tabSignatures[i - 1].distSTDskel = distSTDcentreGrav(SKEL);
+				TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 1].skelXcentreGrav), &(TAB.tabSignatures[i - 1].skelYcentreGrav));
+				imCentreGrav(OUT, &(TAB.tabSignatures[i - 1].boucleXcentreGrav), &(TAB.tabSignatures[i - 1].boucleYcentreGrav));
+				TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 1].skelXcentreGrav - TAB.tabSignatures[i - 1].boucleXcentreGrav;
+				TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 1].skelYcentreGrav - TAB.tabSignatures[i - 1].boucleYcentreGrav;
+				TAB.tabSignatures[i - 1].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+				TAB.tabSignatures[i - 1].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+				TAB.tabSignatures[i - 1].minorAxisSkel = MinorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].majorAxisSkel = MajorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 1].orientationSkel = OrientationEllipse(SKEL);
+				TAB.tabSignatures[i - 1].PHI1skel = imPHI1(SKEL);
+				TAB.tabSignatures[i - 1].PHI2skel = imPHI2(SKEL);
+				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
+				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
+
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				liberationImage(&img);
+				liberationImage(&OUT);
+				liberationImage(&SKEL);
+				liberationImage(&SPUR);
+			}
+		}
+		
+
+		// Fermeture flux et images
+		fclose(F);
+	}
+	else if (choix.uneSeuleImage == 1)
+	{
+		// Construction du chemin fixe à partir du repertoire envoyé par l'utitisateur
+		char prefixe[32] = "..\\..\\Images\\";
+		strncat(prefixe, choix.repertoire, 5);
+		strncat(prefixe, "\\", 3);
+		strncat(prefixe, choix.nomImage, 8);
+		printf("%s\n", prefixe);
+
+		// Réalisation des opérations morpho sur l'image voulue
+		img = lectureImage(prefixe);
+		OUT = allocationImage0(img.Nblig, img.Nbcol);
+		SKEL = allocationImage0(img.Nblig, img.Nbcol);
+		SPUR = allocationImage0(img.Nblig, img.Nbcol);
+		detectionCercle(img, &OUT, &SKEL, &SPUR);
+		
+		// Calcul des signatures
+		char numeros123[4];
+		for (int i = 0; i < 4; i++)
+			numeros123[i] = choix.nomImage[i];
+		numeros123[3] = '\0';
+		int numeros123int = atoi(numeros123);
+
+		TAB.tabSignatures[0].numero = numeros123int;
+		TAB.tabSignatures[0].nbPixBoucleHaut = nbPix255haut(OUT);
+		TAB.tabSignatures[0].nbPixBoucleBas = nbPix255bas(OUT);
+		TAB.tabSignatures[0].compacity = imCompacity(OUT, SPUR);
+		TAB.tabSignatures[0].distSTDskel = distSTDcentreGrav(SKEL);
+		TAB.tabSignatures[0].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+		imCentreGrav(SKEL, &(TAB.tabSignatures[0].skelXcentreGrav), &(TAB.tabSignatures[0].skelYcentreGrav));
+		imCentreGrav(OUT, &(TAB.tabSignatures[0].boucleXcentreGrav), &(TAB.tabSignatures[0].boucleYcentreGrav));
+		TAB.tabSignatures[0].diffSkelBoucleXcentreGrav = TAB.tabSignatures[0].skelXcentreGrav - TAB.tabSignatures[0].boucleXcentreGrav;
+		TAB.tabSignatures[0].diffSkelBoucleYcentreGrav = TAB.tabSignatures[0].skelYcentreGrav - TAB.tabSignatures[0].boucleYcentreGrav;
+		TAB.tabSignatures[0].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+		TAB.tabSignatures[0].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+		TAB.tabSignatures[0].minorAxisSkel = MinorAxisEllipse(SKEL);
+		TAB.tabSignatures[0].majorAxisSkel = MajorAxisEllipse(SKEL);
+		TAB.tabSignatures[0].orientationSkel = OrientationEllipse(SKEL);
+		TAB.tabSignatures[0].PHI1skel = imPHI1(SKEL);
+		TAB.tabSignatures[0].PHI2skel = imPHI2(SKEL);
+		TAB.tabSignatures[0].PHI3skel = imPHI3(SKEL);
+		TAB.tabSignatures[0].PHI4skel = imPHI4(SKEL);
+
+		//fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, numeros123int, TAB.tabSignatures[0].nbPixBoucleHaut, TAB.tabSignatures[0].nbPixBoucleBas, TAB.tabSignatures[0].compacity, TAB.tabSignatures[0].distSTDskel, TAB.tabSignatures[0].nbPixSkelQuartBasGauche, TAB.tabSignatures[0].skelXcentreGrav, TAB.tabSignatures[0].skelYcentreGrav, TAB.tabSignatures[0].boucleXcentreGrav, TAB.tabSignatures[0].boucleYcentreGrav, TAB.tabSignatures[0].diffSkelBoucleXcentreGrav, TAB.tabSignatures[0].diffSkelBoucleYcentreGrav, TAB.tabSignatures[0].nbPixDiagSupSkel, TAB.tabSignatures[0].nbPixDiagInfSkel, TAB.tabSignatures[0].minorAxisSkel, TAB.tabSignatures[0].majorAxisSkel, TAB.tabSignatures[0].orientationSkel, TAB.tabSignatures[0].PHI1skel, TAB.tabSignatures[0].PHI2skel, TAB.tabSignatures[0].PHI3skel, TAB.tabSignatures[0].PHI4skel);
+		liberationImage(&img);
+		liberationImage(&OUT);
+		liberationImage(&SKEL);
+		liberationImage(&SPUR);
+
+
+	}
+	return TAB;
 }
 
 void detectionCercle(IMAGE img, IMAGE *OUT, IMAGE *SKEL, IMAGE *SPUR)
@@ -2834,4 +3173,249 @@ IMAGE imConvexHull(IMAGE img)
 	liberationImage(&imgAgg2);
 	liberationTableau(&histo);
 	return img2;
+}
+
+CHOIX_UTILISATEUR interractionUtilisateur()
+{
+	// Déclaration des variables
+	int choixDossier = -1;
+	int choixImDossier = -1;
+	char *dossier = "";
+	char nomImage[4];
+	char nomImageFinal[8];
+	int troisNumImage;
+	CHOIX_UTILISATEUR choix;
+	choix.nomImage = (char*)malloc(12*sizeof(char));
+
+	printf("Bienvenue sur le programme Assam-OCR \n");
+	
+	// On demande à l'utilisateur sur quel dossier il veux travailler
+	while ((choixDossier != 1) & (choixDossier != 2))
+	{
+		printf("Dans quel dossier voulez-vous travailler ? 1 : train, 2 : test \n");
+		scanf("%d", &choixDossier);
+	}
+
+	// On retient le choix
+	if (choixDossier == 1)
+		dossier = "train";
+	else if (choixDossier == 2)
+		dossier = "test";
+	
+	// On demande à l'utilisateur s'il veux traiter une ou toutes les images
+	while ((choixImDossier != 1) & (choixImDossier != 2))
+	{
+		printf("Voulez-vous traiter une image particuliere ou le dossier entier ? 1 : Une image, 2 : Toute les images \n");
+		scanf("%d", &choixImDossier);
+	}
+
+	// S'il veux traiter une seule image, on lui demande laquelle en fonction du dossier choisi
+	if (choixImDossier == 1)
+	{
+		// Affichage
+		if (choixDossier == 1)
+			printf("Veuillez taper un nombre entre 1 et 387 \n");
+		else if (choixDossier == 2)
+			printf("Veuillez taper un nombre entre 388 et 516 \n");
+
+		// Demande
+		scanf("%d", &troisNumImage);
+		sprintf(nomImage, "%d", troisNumImage);
+
+		// Génération du nom de l'image à traiter sous forme d'une chaine de caractère
+		int i;
+		int compteur = 0;
+		for (i = 0; i < (3 - strlen(nomImage)); i++)
+			nomImageFinal[i] = '0';
+		for (i; i <= 3; i++)
+		{
+			nomImageFinal[i] = nomImage[compteur];
+			compteur++;
+		}
+		nomImageFinal[3] = '.';
+		nomImageFinal[4] = 'p';
+		nomImageFinal[5] = 'g';
+		nomImageFinal[6] = 'm';
+		nomImageFinal[7] = '\0';
+
+		// On informe l'utilisateur de ce qu'il se passe
+		printf("Traitement de l'image %s du dossier %s \n", nomImageFinal, dossier);
+	}
+	// Si l'utilisateur veux traiter toutes les images, on l'informe aussi
+	else if (choixImDossier == 2)
+	{
+		printf("Traitement de l'ensemble des images du dossier %s. Cela peut prendre plusieurs minutes ...\n", dossier);
+	}
+
+	// Remplissage des champs de la structure CHOIX_UTILISATEUR
+	choix.repertoire = dossier;
+	if (choixImDossier == 1)
+	{
+		choix.uneSeuleImage = 1;
+		sprintf(choix.nomImage, "%s", nomImageFinal);
+		choix.nomImage[7] = '\0';
+	}
+	else if (choixImDossier == 2)
+	{
+		choix.uneSeuleImage = 0;
+		choix.nomImage = "Pas d'image";
+	}
+
+	return choix;
+}
+
+
+
+double imMoment(IMAGE img, int p, int q) { // Veiller à envoyer une image seuillée inversée 
+	int compt = 0;
+	for (int i = 0; i <img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (img.pixel[i][j] == 255) {
+				compt += pow(i, p)*pow(j, q);
+			}
+
+		}
+	}
+
+	return compt;
+}
+
+double ImMomentCentral(IMAGE img, int p, int q) { // Veiller à envoyer une image seuillée inversée 
+	int compt = 0;
+	double Moment00 = 0, Moment10 = 0, Moment01 = 0, CentreGravX = 0, CentreGravY = 0; //Calcul de xbarre et ybarre
+	Moment00 = imMoment(img, 0, 0);
+	Moment10 = imMoment(img, 1, 0);
+	Moment01 = imMoment(img, 0, 1);
+	//printf("Valeur du moment a l'ordre 00 : %lf\nValeur du moment a l'ordre 10: %lf\nValeur du moment a l'ordre 01: %lf\n", Moment00, Moment10, Moment01);
+	CentreGravX = Moment10 / Moment00;
+	CentreGravY = Moment01 / Moment00;
+	//printf("Coordonnée X du CdG =%lf\nCoordonnée Y du CdG = %lf\n", CentreGravX, CentreGravY);
+	for (int i = 0; i <img.Nblig; i++)
+	{
+		for (int j = 0; j < img.Nbcol; j++)
+		{
+			if (img.pixel[i][j] == 255) {
+				compt += pow((i - CentreGravX), p)*pow((j - CentreGravY), q);
+			}
+
+		}
+	}
+
+	return compt;
+}
+
+double MinorAxisEllipse(IMAGE img) { // Veiller à envoyer une image seuillée inversée 
+	double w = 0; // Valeur du Minor Axis
+	double Moment00 = 0, Moment10 = 0, Moment01 = 0, CentreGravX = 0, CentreGravY = 0; //Calcul de xbarre et ybarre
+	Moment00 = imMoment(img, 0, 0);
+	Moment10 = imMoment(img, 1, 0);
+	Moment01 = imMoment(img, 0, 1);
+	CentreGravX = Moment10 / Moment00;
+	CentreGravY = Moment01 / Moment00; // Calcul des ybarre et x barre 
+	double Moment20 = imMoment(img, 2, 0);
+	double Moment02 = imMoment(img, 0, 2);
+	//printf("Valeur de Moment20 : %lf\nValeur de Moment 02: %lf\n", Moment20, Moment02);
+	//printf("Coordonnée X du CdG =%lf\nCoordonnée Y du CdG = %lf\n", CentreGravX, CentreGravY);
+	double Mu20 = (imMoment(img, 2, 0) / imMoment(img, 0, 0)) - pow(CentreGravX, 2); //Calcul des mu necessaires au calcul de w
+	double Mu02 = (imMoment(img, 0, 2) / imMoment(img, 0, 0)) - pow(CentreGravY, 2);
+	double Mu11 = (imMoment(img, 1, 1) / imMoment(img, 0, 0)) - (CentreGravX*CentreGravY);
+	//printf("Valeur de Mu 20 : %lf\nValeur de Mu 02: %lf\nValeur de Mu 11: %lf\n", Mu20, Mu02, Mu11);
+	w = sqrt(8 * ((Mu20 + Mu02) - sqrt((4 * pow(Mu11, 2)) + pow((Mu20 - Mu02), 2))));
+
+	return w;
+}
+
+double MajorAxisEllipse(IMAGE img) { // Veiller à envoyer une image seuillée inversée 
+	double l = 0; // Valeur du Minor Axis
+	double Moment00 = 0, Moment10 = 0, Moment01 = 0, CentreGravX = 0, CentreGravY = 0; //Calcul de xbarre et ybarre
+	Moment00 = imMoment(img, 0, 0);
+	Moment10 = imMoment(img, 1, 0);
+	Moment01 = imMoment(img, 0, 1);
+	CentreGravX = Moment10 / Moment00;
+	CentreGravY = Moment01 / Moment00; // Calcul des ybarre et x barre 
+	double Moment20 = imMoment(img, 2, 0);
+	double Moment02 = imMoment(img, 0, 2);
+	//printf("Valeur de Moment20 : %lf\nValeur de Moment 02: %lf\n", Moment20, Moment02);
+	//printf("Coordonnée X du CdG =%lf\nCoordonnée Y du CdG = %lf\n", CentreGravX, CentreGravY);
+	double Mu20 = (imMoment(img, 2, 0) / imMoment(img, 0, 0)) - pow(CentreGravX, 2); //Calcul des mu necessaires au calcul de l
+	double Mu02 = (imMoment(img, 0, 2) / imMoment(img, 0, 0)) - pow(CentreGravY, 2);
+	double Mu11 = (imMoment(img, 1, 1) / imMoment(img, 0, 0)) - (CentreGravX*CentreGravY);
+	//printf("Valeur de Mu 20 : %lf\nValeur de Mu 02: %lf\nValeur de Mu 11: %lf\n", Mu20, Mu02, Mu11);
+	l = sqrt(8 * ((Mu20 + Mu02) + sqrt((4 * pow(Mu11, 2)) + pow((Mu20 - Mu02), 2))));
+
+	return l;
+}
+
+double OrientationEllipse(IMAGE img) {  // Veiller à envoyer une image seuillée inversée 
+	double teta = 0; // Valeur du Minor Axis
+	double Moment00 = 0, Moment10 = 0, Moment01 = 0, CentreGravX = 0, CentreGravY = 0; //Calcul de xbarre et ybarre
+	Moment00 = imMoment(img, 0, 0);
+	Moment10 = imMoment(img, 1, 0);
+	Moment01 = imMoment(img, 0, 1);
+	CentreGravX = Moment10 / Moment00;
+	CentreGravY = Moment01 / Moment00; // Calcul des ybarre et x barre 
+	double Moment20 = imMoment(img, 2, 0);
+	double Moment02 = imMoment(img, 0, 2);
+
+	double Mu20 = (imMoment(img, 2, 0) / imMoment(img, 0, 0)) - pow(CentreGravX, 2); //Calcul des mu necessaires au calcul de téta
+	double Mu02 = (imMoment(img, 0, 2) / imMoment(img, 0, 0)) - pow(CentreGravY, 2);
+	double Mu11 = (imMoment(img, 1, 1) / imMoment(img, 0, 0)) - (CentreGravX*CentreGravY);
+
+	teta = 0.5 * (atan((2 * Mu11) / (Mu20 - Mu02)));
+	return teta;
+}
+
+double imPHI1(IMAGE img)
+{
+	double M20 = imMoment(img, 2, 0);
+	double M02 = imMoment(img, 0, 2);
+	return (M20 + M02)/10000000;
+}
+
+double imPHI2(IMAGE img)
+{
+	double M20 = imMoment(img, 2, 0);
+	double M02 = imMoment(img, 0, 2);
+	double M11 = imMoment(img, 1, 1);
+	return (((M20 - M02)*(M20 - M02)) + (4 * M11*M11))/10000000000;
+}
+
+double imPHI3(IMAGE img)
+{
+	double M30 = imMoment(img, 3, 0);
+	double M03 = imMoment(img, 0, 3);
+	double M12 = imMoment(img, 1, 2);
+	double M21 = imMoment(img, 2, 1);
+	double res1 = 3 * M12;
+	res1 = M30 - res1;
+	double res2 = 3 * M21;
+	res2 = res2 - M03;
+	return ((res1*res1) + (res2*res2)) / 10000000000000;
+}
+
+double imPHI4(IMAGE img)
+{
+	double M30 = imMoment(img, 3, 0);
+	double M03 = imMoment(img, 0, 3);
+	double M12 = imMoment(img, 1, 2);
+	double M21 = imMoment(img, 2, 1);
+	return (((M30 + M12)*(M30 + M12)) + ((M21 + M03)*(M21 + M03))) / 100000000000000;
+}
+
+TABLEAU_SIGNATURES allocationTableauSignatures(int size)
+{
+	TABLEAU_SIGNATURES tab = { 0, NULL };
+	
+	tab.nbSignatures = size;
+	tab.tabSignatures = (SIGNATURES_OCR*)malloc(size * sizeof(SIGNATURES_OCR));
+
+	return (tab);
+}
+
+void liberationTableauSignatures(TABLEAU_SIGNATURES* tab)
+{
+	free(tab->tabSignatures);
+	tab->tabSignatures = NULL;
 }

@@ -134,10 +134,12 @@
 								   // le perimetre n'est pas bon, provient surrement de l'image skel, on calculera la compacité avec nbPix image SPUR pour le moment
 
 	// Fonction calcul des signatures et enregistrement csv ------------------------------------------------------------------------------------------
-	void signatureToCSV(char *repertoire); // EN DEV
+	void signatureToCSV(char *repertoire); //
+	
 
 	// Définitions de structures
 	typedef struct signaturesOCR {
+		int numero;
 		int nbPixBoucleHaut;
 		int nbPixBoucleBas;
 		double compacity;
@@ -151,10 +153,47 @@
 		double diffSkelBoucleYcentreGrav;
 		int nbPixDiagInfSkel;
 		int nbPixDiagSupSkel;
+		double minorAxisSkel;
+		double majorAxisSkel;
+		double orientationSkel;
+		double PHI1skel;
+		double PHI2skel;
+		double PHI3skel;
+		double PHI4skel;
 	} SIGNATURES_OCR;
 
+	typedef struct tableauSignatures {
+		int nbSignatures;
+		SIGNATURES_OCR *tabSignatures;
+	} TABLEAU_SIGNATURES;
+
+	typedef struct choixUtilisateur { // Cette structure permet à la fonction interractionUtilisateur de retourner les choix fais par l'utilisateur
+		char *repertoire; // "train" ou "test"
+		int uneSeuleImage; // = 0 si l'utilisateur veux traiter tout le répertoire, = 1 s'il veux traiter une seule image
+		char *nomImage; // ex : 003.pgm
+	} CHOIX_UTILISATEUR;
+
+	TABLEAU_SIGNATURES allocationTableauSignatures(int size); // permet l'allocation mémoire d'un tableau de signatures
+	void liberationTableauSignatures(TABLEAU_SIGNATURES* tab); // permet la liberation de mémoire d'un tableau de signatures
+
+	TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix); // calcule les signatures suivant le choix utilisateur et les renvoies sous forme d'un tableau de structures signatures
+
 	// FONCTIONS EN DEVELOPPEMENT
-	IMAGE imConvexHull(IMAGE img);		// Renvoie l'enveloppe convexe de l'image
-	
+	IMAGE imConvexHull(IMAGE img);		// Renvoie l'enveloppe convexe de l'image RENVOIE UN CONVEXE MAIS PAS LE PLUS PETIT...
+
+	// FONCTION D'INTERACTIONS UTILISATEUR
+	CHOIX_UTILISATEUR interractionUtilisateur();  // Demande à l'utilisateur s'il veux faire fonctionner le programme sur un caractère ou un répertoire entier (renvoie une structure contenant les choix)
+
+	// FONCTIONS ELLIPSE
+	double imMoment(IMAGE img, int p, int q); // Renvoie le moment d'ordre p et q d'une image binaire
+	double ImMomentCentral(IMAGE img, int p, int q);	// Renvoie le moment central d'ordre p et q d'une image binaire
+	double MinorAxisEllipse(IMAGE img);		// Renvoie la taille du petit axe de l'approximation elliptique de l'ensemble des objets d'une image binaire
+	double MajorAxisEllipse(IMAGE img);		// Renvoie la taille du grand axe de l'approximation elliptique de l'ensemble des objets d'une image binaire
+	double OrientationEllipse(IMAGE img);	// Renvoie l'angle en radian de l'orientation du grand axe de l'ellipse avec l'axe y
+	double imPHI1(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
+	double imPHI2(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
+	double imPHI3(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
+	double imPHI4(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
+
 #endif LIB_IMAGES_H
 

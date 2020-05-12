@@ -198,44 +198,57 @@
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
 ..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2316): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2354): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2361): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1769): note: voir la déclaration de 'sprintf'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2355): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2362): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2356): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2363): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2359): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2366): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2396): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2410): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1769): note: voir la déclaration de 'sprintf'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2397): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2411): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2398): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2412): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2401): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2415): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2440): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2461): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1769): note: voir la déclaration de 'sprintf'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2441): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2462): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2442): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2463): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2445): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2466): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2504): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2527): warning C4047: 'fonction' : les niveaux d'indirection de 'int *' et de 'int **' sont différents
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2527): warning C4024: 'maxETindTabInt' : types différents pour le paramètre formel et réel 2
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2527): warning C4024: 'maxETindTabInt' : types différents pour le paramètre formel et réel 3
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2533): warning C4047: 'fonction' : les niveaux d'indirection de 'int' et de 'int *' sont différents
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2533): warning C4024: 'numDiskToString' : types différents pour le paramètre formel et réel 1
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2534): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2505): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2537): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2560): warning C4047: 'fonction' : les niveaux d'indirection de 'int *' et de 'int **' sont différents
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2560): warning C4024: 'maxETindTabInt' : types différents pour le paramètre formel et réel 2
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2560): warning C4024: 'maxETindTabInt' : types différents pour le paramètre formel et réel 3
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2566): warning C4047: 'fonction' : les niveaux d'indirection de 'int' et de 'int *' sont différents
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2566): warning C4024: 'numDiskToString' : types différents pour le paramètre formel et réel 1
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2567): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2538): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
-..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2535): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2568): warning C4996: 'strncat': This function or variable may be unsafe. Consider using strncat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\string.h(255): note: voir la déclaration de 'strncat'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2922): warning C4018: '<' : incompatibilité signed/unsigned
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2890): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1270): note: voir la déclaration de 'scanf'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2903): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1270): note: voir la déclaration de 'scanf'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2916): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1270): note: voir la déclaration de 'scanf'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2917): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1769): note: voir la déclaration de 'sprintf'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2949): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(1769): note: voir la déclaration de 'sprintf'
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2970): warning C4244: '+=' : conversion de 'double' en 'int', perte possible de données
+..\..\..\..\..\Analyse d'image\Assam-OCR\Visual\Src\libImages.c(2994): warning C4244: '+=' : conversion de 'double' en 'int', perte possible de données
   main.c
   Génération de code en cours
-  2 of 50 functions ( 4.0%) were compiled, the rest were copied from previous compilation.
+  1 of 20 functions ( 5.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Fin de la génération du code

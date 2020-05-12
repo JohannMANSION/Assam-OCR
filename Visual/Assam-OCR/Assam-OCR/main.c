@@ -13,7 +13,6 @@
 
 void main(void)
 {
-	
 	//IMAGE test = lectureImage("..\\..\\Images\\test\\388.pgm");
 
 	//listeImages();
@@ -23,7 +22,7 @@ void main(void)
 	IMAGE imgSeuilleeInversee = { 0,0,NULL,NULL };
 	IMAGE imgSeuilInvDil0 = { 0,0,NULL,NULL };
 
-	char nomImage[8] = "006.pgm";
+	char nomImage[8] = "001.pgm";
 	img = lectureImage(nomImage);
 	//sauvegardeImage(img, "P5", "..\\..\\Res\\img.pgm");
 
@@ -44,9 +43,12 @@ void main(void)
 	liberationTableauDouble(&tab);
 	*/
 
+	/*
 	IMAGE testCONVEX = imConvexHull(imgSeuilleeInversee);
 	sauvegardeImage(testCONVEX, "P5", "..\\..\\Res\\testCONVEX.pgm");
 	liberationImage(&testCONVEX);
+	*/
+	//printf("TEST : %lf %lf %lf %lf \n", imPHI1(imgSeuilleeInversee), imPHI2(imgSeuilleeInversee), imPHI3(imgSeuilleeInversee), imPHI4(imgSeuilleeInversee));
 
 	liberationImage(&img);
 	liberationImage(&imgSeuillee);
@@ -54,7 +56,8 @@ void main(void)
 	liberationImage(&imgSeuilInvDil0);
 
 	//signatureToCSV("train");
-	
+	CHOIX_UTILISATEUR choix = { "train", 1, "002.pgm" };
+	TABLEAU_SIGNATURES TAB = calculSignatures(choix);
 
 
 	_CrtDumpMemoryLeaks();
