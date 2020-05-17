@@ -205,6 +205,155 @@ IMAGE lectureImage(const char *in)
 	return img;
 }
 
+IMAGE lectureImageSansPrint(const char *in)
+{
+	FILE *F = NULL;
+	IMAGE img = { 0,0,NULL };
+	int dynamique = 0;
+
+	if ((F = fopen(in, "r")) == NULL)
+	{
+		printf("Pb image inexistante");
+	}
+	else
+	{
+		char type[3];
+
+		fgets(type, 3, F);
+		fclose(F);
+		/* selon le type ouverture binaire ou texte */
+		if (strcmp(type, "P2") == 0)  /* cas ASCII niveaux de gris */
+		{
+			char buf;
+
+			F = fopen(in, "r");
+
+			/* lecture caractère après caractère compte-tenu de la diversité des entêtes possibles */
+			fscanf(F, "%c", &type[0]);
+			fscanf(F, "%c", &type[1]);
+			fscanf(F, "%c", &buf); /* caractère espacement */
+
+			fscanf(F, "%c", &buf);
+			if (buf == '#') {
+				/* on ignore tout jusqu'à trouver '\n' */
+				while (buf != '\n')
+					fscanf(F, "%c", &buf);
+				fscanf(F, "%c", &buf);
+			}
+			while (((buf - '0') >= 0) && ((buf - '0') <= 9)) { /* possibilité d'utiliser également isdigit de la librairie standard <ctype.h> */
+				img.Nbcol = img.Nbcol * 10 + (buf - '0');
+				fscanf(F, "%c", &buf);
+			}
+
+			fscanf(F, "%c", &buf);
+			if (buf == '#') {
+				/* on ignore tout jusqu'à trouver '\n' */
+				while (buf != '\n')
+					fscanf(F, "%c", &buf);
+				fscanf(F, "%c", &buf);
+			}
+			while (((buf - '0') >= 0) && ((buf - '0') <= 9)) {
+				img.Nblig = img.Nblig * 10 + (buf - '0');
+				fscanf(F, "%c", &buf);
+			}
+
+			fscanf(F, "%c", &buf);
+			if (buf == '#') {
+				/* on ignore tout jusqu'à trouver '\n' */
+				while (buf != '\n')
+					fscanf(F, "%c", &buf);
+				fscanf(F, "%c", &buf);
+			}
+			while (((buf - '0') >= 0) && ((buf - '0') <= 9)) {
+				dynamique = dynamique * 10 + (buf - '0');
+				fscanf(F, "%c", &buf);
+			}
+
+			/* début des data */
+
+			//printf("Lecture image NG type %s avec %d lignes et %d colonnes...\n", type, img.Nblig, img.Nbcol);
+
+			/* taille connue, allocation dynamique possible */
+			img = allocationImage(img.Nblig, img.Nbcol);
+
+			/* lecture pixel par pixel */
+			{
+				int i, j;
+				int tmp;
+
+				for (i = 0; i<img.Nblig; i++)
+					for (j = 0; j<img.Nbcol; j++)
+					{
+						fscanf(F, "%d", &tmp);
+						img.pixel[i][j] = (unsigned char)tmp;
+					}
+			}
+		}
+		else
+			if (strcmp(type, "P5") == 0)  /* cas brut niveaux de gris */
+			{
+				char buf;
+
+				F = fopen(in, "rb");
+
+				/* lecture caractère après caractère compte-tenu de la diversité des entêtes possibles */
+				type[0] = fgetc(F);
+				type[1] = fgetc(F);
+				buf = fgetc(F); /* caractère espacement */
+
+				buf = fgetc(F);
+				if (buf == '#') {
+					/* on ignore tout jusqu'à trouver '\n' */
+					while (buf != '\n')
+						buf = fgetc(F);
+					buf = fgetc(F);
+				}
+				while (((buf - '0') >= 0) && ((buf - '0') <= 9)) { /* possibilité d'utiliser également isdigit de la librairie standard <ctype.h> */
+					img.Nbcol = img.Nbcol * 10 + (buf - '0');
+					buf = fgetc(F);
+				}
+
+				buf = fgetc(F);
+				if (buf == '#') {
+					/* on ignore tout jusqu'à trouver '\n' */
+					while (buf != '\n')
+						buf = fgetc(F);
+					buf = fgetc(F);
+				}
+				while (((buf - '0') >= 0) && ((buf - '0') <= 9)) {
+					img.Nblig = img.Nblig * 10 + (buf - '0');
+					buf = fgetc(F);
+				}
+
+				buf = fgetc(F);
+				if (buf == '#') {
+					/* on ignore tout jusqu'à trouver '\n' */
+					while (buf != '\n')
+						buf = fgetc(F);
+					buf = fgetc(F);
+				}
+				while (((buf - '0') >= 0) && ((buf - '0') <= 9)) {
+					dynamique = dynamique * 10 + (buf - '0');
+					buf = fgetc(F);
+				}
+
+				/* début des data */
+
+				//printf("Lecture image NG type %s avec %d lignes et %d colonnes...\n", type, img.Nblig, img.Nbcol);
+
+				/* taille connue, allocation dynamique possible */
+				img = allocationImage(img.Nblig, img.Nbcol);
+
+				/* lecture d'un bloc */
+				fread(img.data, sizeof(unsigned char), img.Nbcol*img.Nblig, F);
+			}
+			else
+				printf("Format non supporte pour l'instant...\n");
+		fclose(F);
+	}
+	return img;
+}
+
 void sauvegardeImage(IMAGE img, const char *type, const char *out)
 {
 	FILE *F = NULL;
@@ -2593,7 +2742,7 @@ TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
 				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
 				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
 
-				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
 				liberationImage(&img);
 				liberationImage(&OUT);
 				liberationImage(&SKEL);
@@ -2644,7 +2793,7 @@ TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
 				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
 				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
 
-				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
 				liberationImage(&img);
 				liberationImage(&OUT);
 				liberationImage(&SKEL);
@@ -2694,7 +2843,7 @@ TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
 				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
 				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
 
-				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
 				liberationImage(&img);
 				liberationImage(&OUT);
 				liberationImage(&SKEL);
@@ -2729,27 +2878,27 @@ TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
 				detectionCercle(img, &OUT, &SKEL, &SPUR);
 
 				// Calcul des signatures
-				TAB.tabSignatures[i - 1].numero = i;
-				TAB.tabSignatures[i - 1].nbPixBoucleHaut = nbPix255haut(OUT);
-				TAB.tabSignatures[i - 1].nbPixBoucleBas = nbPix255bas(OUT);
-				TAB.tabSignatures[i - 1].compacity = imCompacity(OUT, SPUR);
-				TAB.tabSignatures[i - 1].distSTDskel = distSTDcentreGrav(SKEL);
-				TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
-				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 1].skelXcentreGrav), &(TAB.tabSignatures[i - 1].skelYcentreGrav));
-				imCentreGrav(OUT, &(TAB.tabSignatures[i - 1].boucleXcentreGrav), &(TAB.tabSignatures[i - 1].boucleYcentreGrav));
-				TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 1].skelXcentreGrav - TAB.tabSignatures[i - 1].boucleXcentreGrav;
-				TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 1].skelYcentreGrav - TAB.tabSignatures[i - 1].boucleYcentreGrav;
-				TAB.tabSignatures[i - 1].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
-				TAB.tabSignatures[i - 1].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
-				TAB.tabSignatures[i - 1].minorAxisSkel = MinorAxisEllipse(SKEL);
-				TAB.tabSignatures[i - 1].majorAxisSkel = MajorAxisEllipse(SKEL);
-				TAB.tabSignatures[i - 1].orientationSkel = OrientationEllipse(SKEL);
-				TAB.tabSignatures[i - 1].PHI1skel = imPHI1(SKEL);
-				TAB.tabSignatures[i - 1].PHI2skel = imPHI2(SKEL);
-				TAB.tabSignatures[i - 1].PHI3skel = imPHI3(SKEL);
-				TAB.tabSignatures[i - 1].PHI4skel = imPHI4(SKEL);
+				TAB.tabSignatures[i - 388].numero = i;
+				TAB.tabSignatures[i - 388].nbPixBoucleHaut = nbPix255haut(OUT);
+				TAB.tabSignatures[i - 388].nbPixBoucleBas = nbPix255bas(OUT);
+				TAB.tabSignatures[i - 388].compacity = imCompacity(OUT, SPUR);
+				TAB.tabSignatures[i - 388].distSTDskel = distSTDcentreGrav(SKEL);
+				TAB.tabSignatures[i - 388].nbPixSkelQuartBasGauche = nbPixQuartBasGauche255(SKEL);
+				imCentreGrav(SKEL, &(TAB.tabSignatures[i - 388].skelXcentreGrav), &(TAB.tabSignatures[i - 388].skelYcentreGrav));
+				imCentreGrav(OUT, &(TAB.tabSignatures[i - 388].boucleXcentreGrav), &(TAB.tabSignatures[i - 388].boucleYcentreGrav));
+				TAB.tabSignatures[i - 388].diffSkelBoucleXcentreGrav = TAB.tabSignatures[i - 388].skelXcentreGrav - TAB.tabSignatures[i - 388].boucleXcentreGrav;
+				TAB.tabSignatures[i - 388].diffSkelBoucleYcentreGrav = TAB.tabSignatures[i - 388].skelYcentreGrav - TAB.tabSignatures[i - 388].boucleYcentreGrav;
+				TAB.tabSignatures[i - 388].nbPixDiagSupSkel = nbPixDiagSup255(SKEL);
+				TAB.tabSignatures[i - 388].nbPixDiagInfSkel = nbPixDiagInf255(SKEL);
+				TAB.tabSignatures[i - 388].minorAxisSkel = MinorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 388].majorAxisSkel = MajorAxisEllipse(SKEL);
+				TAB.tabSignatures[i - 388].orientationSkel = OrientationEllipse(SKEL);
+				TAB.tabSignatures[i - 388].PHI1skel = imPHI1(SKEL);
+				TAB.tabSignatures[i - 388].PHI2skel = imPHI2(SKEL);
+				TAB.tabSignatures[i - 388].PHI3skel = imPHI3(SKEL);
+				TAB.tabSignatures[i - 388].PHI4skel = imPHI4(SKEL);
 
-				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 1].nbPixBoucleHaut, TAB.tabSignatures[i - 1].nbPixBoucleBas, TAB.tabSignatures[i - 1].compacity, TAB.tabSignatures[i - 1].distSTDskel, TAB.tabSignatures[i - 1].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 1].skelXcentreGrav, TAB.tabSignatures[i - 1].skelYcentreGrav, TAB.tabSignatures[i - 1].boucleXcentreGrav, TAB.tabSignatures[i - 1].boucleYcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 1].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 1].nbPixDiagSupSkel, TAB.tabSignatures[i - 1].nbPixDiagInfSkel, TAB.tabSignatures[i - 1].minorAxisSkel, TAB.tabSignatures[i - 1].majorAxisSkel, TAB.tabSignatures[i - 1].orientationSkel, TAB.tabSignatures[i - 1].PHI1skel, TAB.tabSignatures[i - 1].PHI2skel, TAB.tabSignatures[i - 1].PHI3skel, TAB.tabSignatures[i - 1].PHI4skel);
+				fprintf(F, "%s;%d;%d;%d;%lf;%lf;%d;%lf;%lf;%lf;%lf;%lf;%lf;%d;%d;%lf;%lf;%lf;%lf;%lf;%lf;%lf\n", nomImg, i % 10, TAB.tabSignatures[i - 388].nbPixBoucleHaut, TAB.tabSignatures[i - 388].nbPixBoucleBas, TAB.tabSignatures[i - 388].compacity, TAB.tabSignatures[i - 388].distSTDskel, TAB.tabSignatures[i - 388].nbPixSkelQuartBasGauche, TAB.tabSignatures[i - 388].skelXcentreGrav, TAB.tabSignatures[i - 388].skelYcentreGrav, TAB.tabSignatures[i - 388].boucleXcentreGrav, TAB.tabSignatures[i - 388].boucleYcentreGrav, TAB.tabSignatures[i - 388].diffSkelBoucleXcentreGrav, TAB.tabSignatures[i - 388].diffSkelBoucleYcentreGrav, TAB.tabSignatures[i - 388].nbPixDiagInfSkel, TAB.tabSignatures[i - 388].nbPixDiagSupSkel, TAB.tabSignatures[i - 388].minorAxisSkel, TAB.tabSignatures[i - 388].majorAxisSkel, TAB.tabSignatures[i - 388].orientationSkel, TAB.tabSignatures[i - 388].PHI1skel, TAB.tabSignatures[i - 388].PHI2skel, TAB.tabSignatures[i - 388].PHI3skel, TAB.tabSignatures[i - 388].PHI4skel);
 				liberationImage(&img);
 				liberationImage(&OUT);
 				liberationImage(&SKEL);
@@ -2768,7 +2917,7 @@ TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix)
 		strncat(prefixe, choix.repertoire, 5);
 		strncat(prefixe, "\\", 3);
 		strncat(prefixe, choix.nomImage, 8);
-		printf("%s\n", prefixe);
+		//printf("%s\n", prefixe);
 
 		// Réalisation des opérations morpho sur l'image voulue
 		img = lectureImage(prefixe);
@@ -2842,7 +2991,7 @@ void detectionCercle(IMAGE img, IMAGE *OUT, IMAGE *SKEL, IMAGE *SPUR)
 		liberationImage(&SE);
 		strcpy(cheminSEetSE, cheminSE);
 		strncat(cheminSEetSE, imAouvrir, 10);
-		SE = lectureImage(cheminSEetSE);
+		SE = lectureImageSansPrint(cheminSEetSE);
 		
 		// Liberation avec allocation
 		liberationImage(&close);
@@ -2882,7 +3031,7 @@ void detectionCercle(IMAGE img, IMAGE *OUT, IMAGE *SKEL, IMAGE *SPUR)
 
 
 	// Ouverture de l'élément structurant et réalisation des opérations sur l'image
-	SE = lectureImage(cheminSEetSE);
+	SE = lectureImageSansPrint(cheminSEetSE);
 	close = imCloseMATLAB(BW, SE);
 	SKEL[0] = imSkelApprox(close);
 	SPUR[0] = imSpurInf(SKEL[0]);
@@ -3187,7 +3336,7 @@ CHOIX_UTILISATEUR interractionUtilisateur()
 	CHOIX_UTILISATEUR choix;
 	choix.nomImage = (char*)malloc(12*sizeof(char));
 
-	printf("Bienvenue sur le programme Assam-OCR \n");
+	
 	
 	// On demande à l'utilisateur sur quel dossier il veux travailler
 	while ((choixDossier != 1) & (choixDossier != 2))
@@ -3418,4 +3567,120 @@ void liberationTableauSignatures(TABLEAU_SIGNATURES* tab)
 {
 	free(tab->tabSignatures);
 	tab->tabSignatures = NULL;
+}
+
+// Pour rendre la fonction plus propre, il faudrai la rendre void et lui envoyer l'adresse
+TABLEAU_SIGNATURES classification(TABLEAU_SIGNATURES tab)
+{
+	// Parcours de touts les numéros présents dans le tableau de signatures
+	for (int i = 0; i < tab.nbSignatures; i++)
+	{
+		// Vérification des seuils signatures pour chacun et verdict sur le numéro détecté
+		if ((tab.tabSignatures[i].nbPixBoucleHaut >= 1600) & (tab.tabSignatures[i].distSTDskel <= 6.3))
+			tab.tabSignatures[i].numeroDetecte = 1;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut >= 1000) & (tab.tabSignatures[i].nbPixBoucleBas <= 900) & (tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 50))
+			tab.tabSignatures[i].numeroDetecte = 8;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut >= 850) & (tab.tabSignatures[i].nbPixBoucleHaut <= 3100) & (tab.tabSignatures[i].nbPixBoucleBas >= 1200) & (tab.tabSignatures[i].nbPixBoucleBas <= 3500) & (tab.tabSignatures[i].distSTDskel >= 11) & (tab.tabSignatures[i].distSTDskel <= 16) & (tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -6.5) & (tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= 2.5) & (tab.tabSignatures[i].orientationSkel >= -0.5) & (tab.tabSignatures[i].orientationSkel <= 0.65))
+			tab.tabSignatures[i].numeroDetecte = 5;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut >= 900) & (tab.tabSignatures[i].nbPixBoucleHaut <= 2900) & (tab.tabSignatures[i].nbPixBoucleBas >= 1350) & (tab.tabSignatures[i].nbPixBoucleBas <= 3900) & (tab.tabSignatures[i].boucleXcentreGrav >= 44) & (tab.tabSignatures[i].boucleXcentreGrav <= 64) & (tab.tabSignatures[i].boucleYcentreGrav >= 25) & (tab.tabSignatures[i].boucleYcentreGrav <= 51) & ((tab.tabSignatures[i].distSTDskel <= 7) | (tab.tabSignatures[i].distSTDskel >= 8)))
+			tab.tabSignatures[i].numeroDetecte = 6;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut <= 500) & (tab.tabSignatures[i].nbPixDiagSupSkel >= 30) & (tab.tabSignatures[i].nbPixDiagSupSkel <= 90) & (tab.tabSignatures[i].majorAxisSkel >= 85) & (tab.tabSignatures[i].majorAxisSkel <= 125) & (tab.tabSignatures[i].boucleXcentreGrav >= 65) & (tab.tabSignatures[i].boucleXcentreGrav <= 100) & (tab.tabSignatures[i].skelYcentreGrav >= 28) & (tab.tabSignatures[i].skelYcentreGrav <= 50) & ((tab.tabSignatures[i].PHI3skel <= 1340) | (tab.tabSignatures[i].PHI3skel >= 2100)) & ((tab.tabSignatures[i].PHI4skel <= 220) | (tab.tabSignatures[i].PHI4skel >= 250)) & ((tab.tabSignatures[i].boucleYcentreGrav < 50) | (tab.tabSignatures[i].boucleYcentreGrav >= 64)) & ((tab.tabSignatures[i].diffSkelBoucleXcentreGrav <= -24) | (tab.tabSignatures[i].diffSkelBoucleXcentreGrav >= -22)))
+			tab.tabSignatures[i].numeroDetecte = 9;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut <= 1050) & (tab.tabSignatures[i].nbPixBoucleBas < 1020) & (tab.tabSignatures[i].distSTDskel > 10) & (tab.tabSignatures[i].boucleXcentreGrav <= 84) & (tab.tabSignatures[i].skelYcentreGrav <= 62) & (tab.tabSignatures[i].boucleYcentreGrav <= 71) & ((tab.tabSignatures[i].compacity <= 0.95) | (tab.tabSignatures[i].compacity >= 1.0054)) & ((tab.tabSignatures[i].PHI1skel <= 0.215) | (tab.tabSignatures[i].PHI1skel >= 0.24)) & ((tab.tabSignatures[i].PHI3skel <= 1620) | (tab.tabSignatures[i].PHI3skel >= 1845)) & ((tab.tabSignatures[i].minorAxisSkel <= 70.50) | (tab.tabSignatures[i].minorAxisSkel >= 70.9)) & ((tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -15) | (tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= -20)) & ((tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 87) | (tab.tabSignatures[i].nbPixSkelQuartBasGauche >= 89)) & (tab.tabSignatures[i].orientationSkel >= -0.73))
+			tab.tabSignatures[i].numeroDetecte = 3;
+		else if ((tab.tabSignatures[i].nbPixBoucleHaut <= 350) & (tab.tabSignatures[i].diffSkelBoucleXcentreGrav >= -32.267) & (tab.tabSignatures[i].diffSkelBoucleXcentreGrav <= -5) & (tab.tabSignatures[i].nbPixDiagInfSkel >= 50) & (tab.tabSignatures[i].nbPixDiagInfSkel <= 180) & ((tab.tabSignatures[i].boucleYcentreGrav <= 70.5) | (tab.tabSignatures[i].boucleYcentreGrav >= 87)) & ((tab.tabSignatures[i].PHI4skel <= 96) | (tab.tabSignatures[i].PHI4skel >= 221)) & ((tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= -31.5) | (tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -8)) & (tab.tabSignatures[i].boucleXcentreGrav >= 63) & (tab.tabSignatures[i].boucleXcentreGrav <= 90) & ((tab.tabSignatures[i].PHI1skel <= 0.18) | (tab.tabSignatures[i].PHI1skel >= 0.183)) & ((tab.tabSignatures[i].PHI3skel <= 1950) | (tab.tabSignatures[i].PHI3skel >= 2005)) & ((tab.tabSignatures[i].orientationSkel <= 0.5) | (tab.tabSignatures[i].orientationSkel >= 0.52)) & ((tab.tabSignatures[i].majorAxisSkel <= 108.1) | (tab.tabSignatures[i].majorAxisSkel >= 109.9)) & ((tab.tabSignatures[i].compacity <= 0.1) | (tab.tabSignatures[i].compacity >= 0.9)) & (tab.tabSignatures[i].PHI2skel >= 175))
+			tab.tabSignatures[i].numeroDetecte = 2;
+		else if ((tab.tabSignatures[i].nbPixSkelQuartBasGauche >= 37) & (tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 90) & ((tab.tabSignatures[i].boucleXcentreGrav <= 71) | (tab.tabSignatures[i].boucleXcentreGrav >= 79)) & (tab.tabSignatures[i].boucleYcentreGrav >= 50) & (tab.tabSignatures[i].boucleYcentreGrav <= 91) & ((tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= -25) | (tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -24.5)) & ((tab.tabSignatures[i].orientationSkel <= -0.455) | (tab.tabSignatures[i].orientationSkel >= -0.394)) & ((tab.tabSignatures[i].PHI4skel <= 110) | (tab.tabSignatures[i].PHI4skel >= 156)) & ((tab.tabSignatures[i].diffSkelBoucleXcentreGrav <= -20.9) | (tab.tabSignatures[i].diffSkelBoucleXcentreGrav >= -5)) & (tab.tabSignatures[i].majorAxisSkel >= 104) & ((tab.tabSignatures[i].skelXcentreGrav <= 57.5) | (tab.tabSignatures[i].skelXcentreGrav >= 59)) & ((tab.tabSignatures[i].nbPixDiagSupSkel <= 70) | (tab.tabSignatures[i].nbPixDiagSupSkel >= 81)) & (tab.tabSignatures[i].minorAxisSkel >= 75) & ((tab.tabSignatures[i].PHI2skel <= 225) | (tab.tabSignatures[i].PHI2skel >= 230)) & ((tab.tabSignatures[i].distSTDskel <= 9.35) | (tab.tabSignatures[i].distSTDskel >= 9.5)) & ((tab.tabSignatures[i].skelYcentreGrav <= 45) | (tab.tabSignatures[i].skelYcentreGrav >= 47.7)))
+			tab.tabSignatures[i].numeroDetecte = 4;
+		else if ( ((tab.tabSignatures[i].nbPixBoucleHaut <= 8) | (tab.tabSignatures[i].nbPixBoucleHaut >= 397)) & ((tab.tabSignatures[i].nbPixBoucleBas <= 8) | (tab.tabSignatures[i].nbPixBoucleBas >= 2300)) & (tab.tabSignatures[i].nbPixSkelQuartBasGauche >= 40) & (tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 100) & (tab.tabSignatures[i].skelXcentreGrav >= 49) & ((tab.tabSignatures[i].PHI3skel <= 910) | (tab.tabSignatures[i].PHI3skel >= 1000)) & ((tab.tabSignatures[i].PHI4skel <= 352) | (tab.tabSignatures[i].PHI4skel >= 365)) )
+			tab.tabSignatures[i].numeroDetecte = 7;
+		else
+			tab.tabSignatures[i].numeroDetecte = 0;
+
+	}
+
+	return tab;
+}
+
+void matriceConfusion(TABLEAU_SIGNATURES tab)
+{
+	// Allocation mémoire d'un tableau d'entier à deux dimensions
+	int **TAB = (int**)calloc(11, sizeof(int*));
+	for (int i = 0; i < 11; i++)
+		TAB[i] = (int*)calloc(11, sizeof(int));
+
+	// Ecriture des différents numéros dans les premieres : colonne et ligne
+	for (int i = 1; i < 11; i++)
+	{
+		TAB[i][0] = i - 1;
+		TAB[0][i] = i - 1;
+	}
+
+	// Ajout +1 dans la bonne case en fonction du verdict et du numéro initial
+	for (int i = 0; i < tab.nbSignatures; i++)
+	{
+		TAB[tab.tabSignatures[i].numeroDetecte + 1][(((tab.tabSignatures[i].numero)%100)%10) + 1] ++;
+	}
+
+	// Affichage matrice confusion
+	printf("\n");
+	printf("Matrice de confusion (en haut les caracteres initiaux et a gauche les caracteres detectes) : \n");
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			printf("%d \t", TAB[i][j]);
+		}
+		printf("\n");
+	}
+
+	// Ouverture du fichier pour écriture de la matrice
+	FILE *F = NULL;
+	F = fopen("..\\..\\Res\\matricesConfusion.csv", "w");
+
+	// En-tête
+	fprintf(F, "%s\n", "Note : Chiffres initiaux en haut et verdict à gauche pour les deux matrices \n");
+	fprintf(F, "%s\n", "Matrice confusion avec le nombre de comptages :\n");
+	fprintf(F, "%s\n", " ");
+
+	// Ecriture de la matrice avec les nombres
+	fprintf(F, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n"," ", " ", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n"," ", " ", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------");
+
+	for (int i = 1; i < 11; i++)
+		fprintf(F, "%d;%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", TAB[i][0], "   ----------", TAB[i][1], TAB[i][2], TAB[i][3], TAB[i][4], TAB[i][5], TAB[i][6], TAB[i][7], TAB[i][8], TAB[i][9], TAB[i][10]);
+
+	// Ecriture de l'entête et du début de la matrice
+	fprintf(F, "\n");
+	fprintf(F, "Matrice confusion en pourcentage :\n\n");
+	fprintf(F, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", " ", " ", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+	fprintf(F, "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n", " ", " ", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------", "   ----------");
+
+		// Compage du total de chaque colonne pour donner les pourcentages par la suite
+	double nbNum[10];
+	double compteur = 0;
+	for (int i = 1; i < 11; i++)
+	{
+		for (int j = 1; j < 11; j++)
+		{
+			compteur += TAB[j][i];
+		}
+		nbNum[i - 1] = compteur;
+		compteur = 0;
+	}
+
+	// Ecriture des données de la matrice
+	for(int i = 1; i < 11; i++)
+		fprintf(F, "%d;%s;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf;%3.1lf\n", TAB[i][0], "   ----------", ((double)TAB[i][1] / nbNum[0])*100, ((double)TAB[i][2] / nbNum[1])*100, ((double)TAB[i][3] / nbNum[2])*100, ((double)TAB[i][4] / nbNum[3])*100, ((double)TAB[i][5] / nbNum[4])*100, ((double)TAB[i][6] / nbNum[5])*100, ((double)TAB[i][7] / nbNum[6])*100, ((double)TAB[i][8] / nbNum[7])*100, ((double)TAB[i][9] / nbNum[8])*100, ((double)TAB[i][10] / nbNum[9])*100);
+
+	// Fermeture du fichier
+	fclose(F);
+
+	// Libération mémoire du tableau à deux dimensions
+	for (int i = 0; i < 11; i++)
+		free(TAB[i]);
+	free(TAB);
+
+	printf("Vous trouverez les matrices de confusion dans le dossier Res sous le nom : matricesConfusion.csv\n");
+	printf("Vous trouverez le tableau des signatures calculees dans le dossier Res sous le nom : signatures.csv\n");
 }

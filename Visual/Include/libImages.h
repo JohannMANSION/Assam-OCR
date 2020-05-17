@@ -51,6 +51,7 @@
 	void liberationImage(IMAGE *im); /* libération mémoire image ndg */
 
 	IMAGE lectureImage(const char *nom); /* mise en mémoire d'une image au format pgm */
+	IMAGE lectureImageSansPrint(const char *in); // Idem fonction précédente mais n'affiche pas à l'écran l'ouverture d'image
 
 	IMAGERGB allocationImageRGB(int Nblig, int Nbcol); /* réservation en mémoire d'une image RGB  */
 	IMAGERGB lectureImageRGB(const char *nom); /* mise en mémoire d'une image au format ppm */
@@ -140,6 +141,7 @@
 	// Définitions de structures
 	typedef struct signaturesOCR {
 		int numero;
+		int numeroDetecte;
 		int nbPixBoucleHaut;
 		int nbPixBoucleBas;
 		double compacity;
@@ -183,6 +185,12 @@
 
 	// FONCTION D'INTERACTIONS UTILISATEUR
 	CHOIX_UTILISATEUR interractionUtilisateur();  // Demande à l'utilisateur s'il veux faire fonctionner le programme sur un caractère ou un répertoire entier (renvoie une structure contenant les choix)
+
+	// FONCTION DE CLASSIFICATION
+	TABLEAU_SIGNATURES classification(TABLEAU_SIGNATURES tab);	// prend le tableau de signatures et le renvoie avec le champ numero detecté remplie
+
+	// FONCTION DE MATRICE CONFUSION
+	void matriceConfusion(TABLEAU_SIGNATURES tab); // Calcule et enregistre la matrice de confusion au format .csv
 
 	// FONCTIONS ELLIPSE
 	double imMoment(IMAGE img, int p, int q); // Renvoie le moment d'ordre p et q d'une image binaire
