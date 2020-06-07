@@ -67,6 +67,6 @@ void main(void)
 
 
 	_CrtDumpMemoryLeaks();
-
+	printf("A bientot sur Assam-OCR !\n");
 	system("pause");
 }
