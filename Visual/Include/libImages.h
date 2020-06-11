@@ -99,15 +99,15 @@
 	IMAGE imSpurInf(IMAGE img); // Enleve toutes les extrémités (opti possible car appel en boucle de imSpur1 donc allocations multiples)
 	IMAGE imCopy(IMAGE img); // Copie l'image
 
-	// Fonctions de morpho banquales --------------------------------------------------------------------------
-	IMAGE imErodeWith0(IMAGE img, IMAGE strel); // On veux le même comportement que MATLAB FONCTION A CHECKER
+	// Fonctions de morpho à utilisation partielles (uniquement pour le projet) -------------------------------
+	IMAGE imErodeWith0(IMAGE img, IMAGE strel); // On veux le même comportement que MATLAB
 	IMAGE imFill(IMAGE img); // Remplis l'intérieur des objets fermés sur l'image (A SURVEILLER NE MARCHE QUE POUR 1 TROUS SUR L'IMAGE)
 	
 	// Fonctions de détection cercle --------------------------------------------------------------------------
 		// Fonction DEBUG
 	void detectionCercleFIX(IMAGE img, char *nomImage); // Sauvegarde chaque image boucle obtenue avec chaque élément structurant (FONCTION DE DEBUG)
 	void detectionCercleV2(IMAGE img, char *nomImage); // Sauvegarde uniquement la meilleure image boucle détectée (FONCTION DE DEBUG)
-	void detectionCercleForAll(); // Déroule detectionCercleV2saveSkel pour tous les caractères (pour vérifier sont bon fonctionnement) // DEROULE POUR LE MOMENT QUE LES NEUFS PREMIERS)
+	void detectionCercleForAll(); // Déroule detectionCercleV2saveSkel pour tous les caractères (pour vérifier sont bon fonctionnement)
 	void numDiskToString(int num, char *chaineTaille11); // Renvoie le nom de l'image à ouvrir associée au numéro du disque (ex : num=1 renvoie "disk1.pgm")
 	void detectionCercleV2saveSkel(IMAGE img, char* nomImage); // Sauvegarde la meilleure image boucle et le skelette et spur(FONCTION DE DEBUG)
 		// Fonction finale utilisable
@@ -138,7 +138,7 @@
 	void signatureToCSV(char *repertoire); //
 	
 
-	// Définitions de structures
+	// Définitions de structures --------------------------------------------------------------------------------------------------------------------
 	typedef struct signaturesOCR {
 		int numero;
 		int numeroDetecte;
@@ -175,13 +175,12 @@
 		char *nomImage; // ex : 003.pgm
 	} CHOIX_UTILISATEUR;
 
+	// ALOCATIONS ET LIBERATIONS ASSOCIEES
 	TABLEAU_SIGNATURES allocationTableauSignatures(int size); // permet l'allocation mémoire d'un tableau de signatures
 	void liberationTableauSignatures(TABLEAU_SIGNATURES* tab); // permet la liberation de mémoire d'un tableau de signatures
 
+	// CALCUL SIGNATURES
 	TABLEAU_SIGNATURES calculSignatures(CHOIX_UTILISATEUR choix); // calcule les signatures suivant le choix utilisateur et les renvoies sous forme d'un tableau de structures signatures
-
-	// FONCTIONS EN DEVELOPPEMENT
-	IMAGE imConvexHull(IMAGE img);		// Renvoie l'enveloppe convexe de l'image RENVOIE UN CONVEXE MAIS PAS LE PLUS PETIT...
 
 	// FONCTION D'INTERACTIONS UTILISATEUR
 	CHOIX_UTILISATEUR interractionUtilisateur();  // Demande à l'utilisateur s'il veux faire fonctionner le programme sur un caractère ou un répertoire entier (renvoie une structure contenant les choix)
@@ -202,6 +201,9 @@
 	double imPHI2(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
 	double imPHI3(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
 	double imPHI4(IMAGE img);	// Composition de moments (déformations par rapport à l'ellipse)
+
+	// FONCTIONS EN DEVELOPPEMENT
+	IMAGE imConvexHull(IMAGE img);		// Renvoie l'enveloppe convexe de l'image RENVOIE UN CONVEXE MAIS PAS LE PLUS PETIT...
 
 #endif LIB_IMAGES_H
 

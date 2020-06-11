@@ -1898,7 +1898,7 @@ void numDiskToString(int num, char *chaineTaille11) //On pourrai remplacer beacu
 	chaineTaille11[i] = '\0';
 }
 
-void detectionCercleFIX(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL    // EN COURS DE DEV
+void detectionCercleFIX(IMAGE img, char* nomImage)
 {
 	// Seuillage et inversion de l'image de base
 	IMAGE seuillee = seuillageOtsu(img);
@@ -1974,7 +1974,7 @@ void detectionCercleFIX(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL  
 	liberationTableau(&surfaces);
 }
 
-void detectionCercleV2(IMAGE img, char* nomImage) // IMAGE *SKEL, IMAGE *FILL    // EN COURS DE DEV
+void detectionCercleV2(IMAGE img, char* nomImage) 
 {
 	// Seuillage et inversion de l'image de base
 	IMAGE seuillee = seuillageOtsu(img);
@@ -3388,6 +3388,7 @@ CHOIX_UTILISATEUR interractionUtilisateur()
 		nomImageFinal[7] = '\0';
 
 		// On informe l'utilisateur de ce qu'il se passe
+		printf("\n...\n");
 		printf("Traitement de l'image %s du dossier %s \n", nomImageFinal, dossier);
 	}
 	// Si l'utilisateur veux traiter toutes les images, on l'informe aussi
@@ -3596,15 +3597,6 @@ TABLEAU_SIGNATURES classification(TABLEAU_SIGNATURES tab)
 			tab.tabSignatures[i].numeroDetecte = 7;
 		else
 			tab.tabSignatures[i].numeroDetecte = 0;
-
-		// Initial numer 9
-		// else if ((tab.tabSignatures[i].nbPixBoucleHaut <= 500) & (tab.tabSignatures[i].nbPixDiagSupSkel >= 30) & (tab.tabSignatures[i].nbPixDiagSupSkel <= 90) & (tab.tabSignatures[i].majorAxisSkel >= 85) & (tab.tabSignatures[i].majorAxisSkel <= 125) & (tab.tabSignatures[i].boucleXcentreGrav >= 65) & (tab.tabSignatures[i].boucleXcentreGrav <= 100) & (tab.tabSignatures[i].skelYcentreGrav >= 28) & (tab.tabSignatures[i].skelYcentreGrav <= 50) & ((tab.tabSignatures[i].PHI3skel <= 1340) | (tab.tabSignatures[i].PHI3skel >= 2100)) & ((tab.tabSignatures[i].PHI4skel <= 220) | (tab.tabSignatures[i].PHI4skel >= 250)) & ((tab.tabSignatures[i].boucleYcentreGrav < 50) | (tab.tabSignatures[i].boucleYcentreGrav >= 64)) & ((tab.tabSignatures[i].diffSkelBoucleXcentreGrav <= -24) | (tab.tabSignatures[i].diffSkelBoucleXcentreGrav >= -22)))
-
-		// Initial number 3
-		// else if ((tab.tabSignatures[i].nbPixBoucleHaut <= 1050) & (tab.tabSignatures[i].nbPixBoucleBas < 1020) & (tab.tabSignatures[i].distSTDskel > 10) & (tab.tabSignatures[i].boucleXcentreGrav <= 84) & (tab.tabSignatures[i].skelYcentreGrav <= 62) & (tab.tabSignatures[i].boucleYcentreGrav <= 71) & ((tab.tabSignatures[i].compacity <= 0.95) | (tab.tabSignatures[i].compacity >= 1.0054)) & ((tab.tabSignatures[i].PHI1skel <= 0.215) | (tab.tabSignatures[i].PHI1skel >= 0.24)) & ((tab.tabSignatures[i].PHI3skel <= 1620) | (tab.tabSignatures[i].PHI3skel >= 1845)) & ((tab.tabSignatures[i].minorAxisSkel <= 70.50) | (tab.tabSignatures[i].minorAxisSkel >= 70.9)) & ((tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -15) | (tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= -20)) & ((tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 87) | (tab.tabSignatures[i].nbPixSkelQuartBasGauche >= 89)) & (tab.tabSignatures[i].orientationSkel >= -0.73))
-
-		// Initial number 4
-		// else if ((tab.tabSignatures[i].nbPixSkelQuartBasGauche >= 37) & (tab.tabSignatures[i].nbPixSkelQuartBasGauche <= 90) & ((tab.tabSignatures[i].boucleXcentreGrav <= 71) | (tab.tabSignatures[i].boucleXcentreGrav >= 79)) & (tab.tabSignatures[i].boucleYcentreGrav >= 50) & (tab.tabSignatures[i].boucleYcentreGrav <= 91) & ((tab.tabSignatures[i].diffSkelBoucleYcentreGrav <= -25) | (tab.tabSignatures[i].diffSkelBoucleYcentreGrav >= -24.5)) & ((tab.tabSignatures[i].orientationSkel <= -0.455) | (tab.tabSignatures[i].orientationSkel >= -0.394)) & ((tab.tabSignatures[i].PHI4skel <= 110) | (tab.tabSignatures[i].PHI4skel >= 156)) & ((tab.tabSignatures[i].diffSkelBoucleXcentreGrav <= -20.9) | (tab.tabSignatures[i].diffSkelBoucleXcentreGrav >= -5)) & (tab.tabSignatures[i].majorAxisSkel >= 104) & ((tab.tabSignatures[i].skelXcentreGrav <= 57.5) | (tab.tabSignatures[i].skelXcentreGrav >= 59)) & ((tab.tabSignatures[i].nbPixDiagSupSkel <= 70) | (tab.tabSignatures[i].nbPixDiagSupSkel >= 81)) & (tab.tabSignatures[i].minorAxisSkel >= 75) & ((tab.tabSignatures[i].PHI2skel <= 225) | (tab.tabSignatures[i].PHI2skel >= 230)) & ((tab.tabSignatures[i].distSTDskel <= 9.35) | (tab.tabSignatures[i].distSTDskel >= 9.5)) & ((tab.tabSignatures[i].skelYcentreGrav <= 45) | (tab.tabSignatures[i].skelYcentreGrav >= 47.7)))
 	}
 
 	return tab;
